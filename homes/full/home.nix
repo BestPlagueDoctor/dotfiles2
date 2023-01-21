@@ -168,7 +168,7 @@ in
     ## Windows ##
     (with pkgs; [
       ntfs3g
-      wineWowPackages.stable
+      #wineWowPackages.stable
 
       dosfstools
       efibootmgr

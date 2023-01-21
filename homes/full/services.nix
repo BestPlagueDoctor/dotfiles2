@@ -42,7 +42,7 @@
   };
 
   gpg-agent = {
-    enable = true;
+    enable = false;
     enableSshSupport = true;
     pinentryFlavor = "curses";
     sshKeys = [

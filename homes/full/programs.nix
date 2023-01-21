@@ -621,13 +621,8 @@
     enable = true;
     settings = {
       mainBar = {
-<<<<<<< HEAD
-        # setting monitor to x220 for testing
-        output = [ "LVDS-1" ];
-=======
         # setting monitor to desky to force a rebuild :)
         output = [ "HDMI-A-1" ];
->>>>>>> refs/remotes/origin/master
         layer = "top";
         position = "top";
         height = 24;
