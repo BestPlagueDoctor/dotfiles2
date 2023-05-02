@@ -629,8 +629,8 @@
     enable = true;
     settings = {
       mainBar = {
-        # setting monitor to x220 for testing
-        output = [ "LVDS-1" ];
+        # setting monitor to desky to force a rebuild :)
+        output = [ "HDMI-A-1" ];
         layer = "top";
         position = "top";
         height = 24;
