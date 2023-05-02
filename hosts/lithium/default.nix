@@ -140,7 +140,6 @@
     bluetooth.enable = true;
     cpu.amd.updateMicrocode = true;
     rtl-sdr.enable = true;
-    video.hidpi.enable = true;
 
     opengl = {
       enable = true;
@@ -449,7 +448,7 @@
 
     podman = {
       enable = true;
-      defaultNetwork.dnsname.enable = true;
+      defaultNetwork.settings.dns_enabled = true;
     };
   };
 
