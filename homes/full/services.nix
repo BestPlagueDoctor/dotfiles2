@@ -4,6 +4,14 @@
   mpris-proxy.enable = true;
   playerctld.enable = true;
 
+  mako = {
+    enable = true;
+    extraConfig = ''
+      [mode=do-not-disturb]
+      invisible=1
+        '';
+  };
+
   emacs = {
     enable = true;
     defaultEditor = true;

@@ -289,10 +289,12 @@
 
     openssh = {
       enable = true;
-      forwardX11 = true;
-      logLevel = "VERBOSE";
-      passwordAuthentication = false;
       ports = [ 22 2222 ];
+      settings = {
+        logLevel = "VERBOSE";
+        passwordAuthentication = false;
+        X11Forwarding = true;
+      };
     };
 
     pipewire = {
