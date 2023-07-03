@@ -14,6 +14,12 @@ in
   stateVersion = lib.mkForce "21.05";
 
   packages =
+    ## Lang Specific ##
+    (with pkgs; [
+      gnuapl
+      shellcheck
+    ]) ++
+
     ## CLI Utils ##
     (with pkgs; [
       bottom
@@ -60,6 +66,8 @@ in
       trash-cli
       unrar
       unzip
+      xplr
+      zellij
       zip
     ])
     ++
@@ -190,6 +198,7 @@ in
       spotify
       ncspot
       playerctl
+      easyeffects
     ])
     ++
     (with pkgs.pkgsMusl; [
@@ -278,6 +287,9 @@ in
     # Cleaning up home dir
     CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
     IPFS_PATH = "${config.xdg.dataHome}/ipfs";
+    EDITOR = lib.getBin (pkgs.writeShellScript "editor" ''
+      exec ${lib.getBin config.services.emacs.package}/bin/emacsclient -ct $@
+    '');
   };
 
   shellAliases = {
@@ -287,6 +299,7 @@ in
     open = "xdg-open";
     rlf = "readlink -f";
     zc = "zcalc -r";
+    zl = "zellij";
 
     noti = "noti ";
     doas = "doas ";

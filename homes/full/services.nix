@@ -4,23 +4,23 @@
   mpris-proxy.enable = true;
   playerctld.enable = true;
 
+  emacs = {
+    enable = true;
+    # TODO: Fix upstream.
+    defaultEditor = false;
+
+    client = {
+      enable = true;
+      arguments = [ "-n" "-t" "-c" ];
+    };
+  };
+
   mako = {
     enable = true;
     extraConfig = ''
       [mode=do-not-disturb]
       invisible=1
         '';
-  };
-
-  emacs = {
-    enable = true;
-    defaultEditor = true;
-    package = config.programs.emacs.finalPackage;
-
-    client = {
-      enable = true;
-      arguments = [ "-c" "-n" ];
-    };
   };
 
   swayidle =
