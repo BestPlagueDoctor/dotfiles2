@@ -69,6 +69,8 @@ in
       xplr
       zellij
       zip
+
+      cudatoolkit
     ])
     ++
     (with pkgs.pkgsMusl; [
