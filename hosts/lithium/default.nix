@@ -350,6 +350,8 @@
     */
   };
 
+  virtualisation.virtualbox.host.enable = true;
+
   systemd = {
     watchdog.rebootTime = "15s";
 
@@ -477,6 +479,7 @@
           "plugdev"
           "scanner"
           "wheel"
+          "vboxusers"
         ];
       };
     };
@@ -533,7 +536,7 @@
 
     hyprland = {
       enable = true;
-      package = inputs.hyprland.packages.${pkgs.system}.default.override { nvidiaPatches = true; };
+      package = inputs.hyprland.packages.${pkgs.system}.default.override { enableNvidiaPatches = true; };
     };
 
     neovim = {
