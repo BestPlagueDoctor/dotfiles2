@@ -291,8 +291,8 @@
       enable = true;
       ports = [ 22 2222 ];
       settings = {
-        logLevel = "VERBOSE";
-        passwordAuthentication = false;
+        LogLevel = "VERBOSE";
+        PasswordAuthentication = false;
         X11Forwarding = true;
       };
     };
