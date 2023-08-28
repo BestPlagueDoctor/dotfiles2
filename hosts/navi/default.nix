@@ -135,6 +135,8 @@
     };
   };
 
+  virtualisation.virtualbox.host.enable = true;
+
   hardware = {
     bluetooth.enable = true;
     cpu.intel.updateMicrocode = true;
@@ -169,7 +171,7 @@
   users.users.sam = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    extraGroups = [ "wheel" "networkmanager" "adbusers" ];
+    extraGroups = [ "wheel" "networkmanager" "adbusers" "vboxusers" ];
   };
 
   environment = {
