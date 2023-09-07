@@ -71,6 +71,7 @@ in
       zip
 
       cudatoolkit
+      #cudaPackages.nsight_systems
     ])
     ++
     (with pkgs.pkgsMusl; [

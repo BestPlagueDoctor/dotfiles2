@@ -564,6 +564,10 @@
           '';
         };
 
+        cuda-mode = {
+          enable = true;
+        };
+
         whitespace-cleanup-mode = {
           enable = true;
           config = ''
