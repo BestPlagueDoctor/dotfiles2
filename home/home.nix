@@ -32,7 +32,6 @@ in
     (with pkgs; [
       bottom
       btop
-      cloc
       comma
       direnv
       duf
@@ -60,7 +59,6 @@ in
       patchutils
       powertop
       procs
-      pstree
       ripgrep
       scc
       sl
@@ -68,7 +66,6 @@ in
       strace
       tcpdump
       tldr
-      tmux
       unrar
       unzip
       xplr
@@ -99,18 +96,8 @@ in
     ## Privacy and Security ##
     (with pkgs; [
       bubblewrap
-      keepassxc
-      ledger-live-desktop
-      monero
-      monero-gui
-      tor-browser-bundle-bin
       usbguard
       veracrypt
-      yubikey-manager
-      yubikey-manager-qt
-      yubikey-personalization
-      yubikey-personalization-gui
-      yubioath-flutter
     ]) ++
 
     ## Desktop Environment ##
@@ -118,9 +105,7 @@ in
       firefox-wayland
       google-chrome
 
-      audacity
       gimp-with-plugins
-      inkscape
       libreoffice-fresh
 
       bemenu
@@ -171,7 +156,6 @@ in
       mpc_cli
       pamixer
       pavucontrol
-      streamlink
       vlc
       yt-dlp
       playerctl
@@ -180,8 +164,6 @@ in
     ## Communication ##
     (with pkgs; [
       discord-canary
-      element-desktop
-      weechat
       zoom-us
     ]);
 

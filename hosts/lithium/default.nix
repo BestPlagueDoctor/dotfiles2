@@ -177,10 +177,7 @@
     nixPath = lib.mkForce [ "nixpkgs=${config.nix.registry.nixpkgs.flake}" ];
 
     registry = {
-      nixpkgs.flake = inputs.unstable;
-      ns.flake = inputs.stable;
-      nu.flake = inputs.unstable;
-      nur.flake = inputs.nur;
+      nixpkgs.flake = inputs.nixpkgs;
     };
 
     #buildMachines = [
@@ -404,13 +401,6 @@
 
     pam = {
       u2f.enable = true;
-
-      loginLimits = [{
-        type = "soft";
-        item = "nofile";
-        value = "65536";
-      }];
-
       services.swaylock = {};
     };
 
