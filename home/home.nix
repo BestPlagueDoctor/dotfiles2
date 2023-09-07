@@ -248,6 +248,6 @@ in
 
     rscp = "rsync -ahvP";
 
-    hl = "exec Hyprland"
+    hl = "exec Hyprland";
   };
 }
