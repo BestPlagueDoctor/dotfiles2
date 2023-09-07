@@ -18,16 +18,16 @@
   bat = {
     enable = true;
     config = {
-      theme = "Dracula";
+      theme = "ayu";
     };
     themes = {
-      dracula = builtins.readFile (pkgs.fetchFromGitHub
+      ayu = builtins.readFile (pkgs.fetchFromGitHub
         {
-          owner = "dracula";
-          repo = "sublime";
-          rev = "26c57ec282abcaa76e57e055f38432bd827ac34e";
-          sha256 = "019hfl4zbn4vm4154hh3bwk6hm7bdxbr1hdww83nabxwjn99ndhv";
-        } + "/Dracula.tmTheme");
+          owner = "dempfi";
+          repo = "ayu";
+          rev = "4.0.3";
+          hash = "sha256-O0zoKAmCgSAHv2gcORYrorIlw0kdXN1+2k2Emtntc2g=";
+        } + "/ayu-dark.tmTheme");
     };
   };
 
@@ -43,7 +43,7 @@
     nix-direnv.enable = true;
   };
 
- emacs = {
+  emacs = {
     enable = true;
     package = pkgs.emacs-pgtk;
 
@@ -58,8 +58,6 @@
         (push '(menu-bar-lines . 0) default-frame-alist)
         (push '(tool-bar-lines . nil) default-frame-alist)
         (push '(vertical-scroll-bars . nil) default-frame-alist)
-
-        (setq frame-title-format "")
 
         (set-face-attribute 'default nil
                             :family "Tamsyn"
@@ -192,10 +190,22 @@
               save-interprogram-paste-before-kill t)
 
         (setq mouse-yank-at-point t)
+
+        (load-theme 'ayu-dark)
+
+        (defun set-background-for-terminal (&optional frame)
+          (or frame (setq frame (selected-frame)))
+          "Unsets the background color in terminal mode."
+          (unless (display-graphic-p frame)
+            (set-face-background 'default "unspecified-bg" frame)))
+
+        (add-hook 'after-make-frame-functions 'set-background-for-terminal)
+        (add-hook 'window-setup-hook 'set-background-for-terminal)
       '';
 
       usePackage = {
         all-the-icons.enable = true;
+        avy.enable = true;
         bazel.enable = true;
         cloc.enable = true;
         clojure-mode.enable = true;
@@ -204,6 +214,7 @@
         git-timemachine.enable = true;
         haskell-mode.enable = true;
         julia-mode.enable = true;
+        magit.enable = true;
         nix-mode.enable = true;
         prism.enable = true;
         rainbow-mode.enable = true;
@@ -211,35 +222,35 @@
         smartparens.enable = true;
         solidity-mode.enable = true;
         symbol-overlay.enable = true;
+        treemacs.enable = true;
         typescript-mode.enable = true;
+        undo-fu.enable = true;
         vterm.enable = true;
         vundo.enable = true;
+        wgrep.enable = true;
 
-        evil = {
+        blamer = {
+          enable = true;
+          config = ''
+            (global-blamer-mode 1)
+          '';
+        };
+
+        cape = {
           enable = true;
           init = ''
-            (setq evil-want-keybinding nil
-                  evil-want-Y-yank-to-eol t
-                  evil-search-wrap t
-                  evil-regexp-search t)
-          '';
-          config = ''
-            (evil-mode)
-          '';
-        };
-
-        evil-collection = {
-          enable = true;
-          after = [ "evil" ];
-          config = ''
-            (evil-collection-init)
-          '';
-        };
-
-        evil-mc = {
-          enable = true;
-          config = ''
-            (global-evil-mc-mode 1)
+            (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+            (add-to-list 'completion-at-point-functions #'cape-file)
+            (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+            (add-to-list 'completion-at-point-functions #'cape-history)
+            ;; (add-to-list 'completion-at-point-functions #'cape-keyword)
+            ;; (add-to-list 'completion-at-point-functions #'cape-tex)
+            ;; (add-to-list 'completion-at-point-functions #'cape-sgml)
+            ;; (add-to-list 'completion-at-point-functions #'cape-rfc1345)
+            (add-to-list 'completion-at-point-functions #'cape-abbrev)
+            ;; (add-to-list 'completion-at-point-functions #'cape-dict)
+            ;; (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+            ;; (add-to-list 'completion-at-point-functions #'cape-line)
           '';
         };
 
@@ -250,200 +261,55 @@
           '';
         };
 
+        consult = {
+          enable = true;
+          config = ''
+            (defun noct-consult-line-evil-history (&rest _)
+              "Add latest `consult-line' search pattern to the evil search history ring.
+               This only works with orderless and for the first component of the search."
+              (when (and (bound-and-true-p evil-mode)
+                         (eq evil-search-module 'evil-search))
+                (let ((pattern (car (orderless-pattern-compiler (car consult--line-history)))))
+                  (add-to-history 'evil-ex-search-history pattern)
+                  (setq evil-ex-search-pattern (list pattern t t))
+                  (setq evil-ex-search-direction 'forward)
+                  (when evil-ex-search-persistent-highlight
+                    (evil-ex-search-activate-highlight evil-ex-search-pattern)))))
+
+            (advice-add #'consult-line :after #'noct-consult-line-evil-history)
+          '';
+        };
+
+        corfu = {
+          enable = true;
+          config = ''
+            (setq
+              corfu-cycle t
+              corfu-auto t)
+            (global-corfu-mode)
+          '';
+        };
+
+        corfu-terminal = {
+          enable = true;
+
+          defines = [ "corfu-terminal-mode" ];
+
+          config = ''
+            (defun corfu-terminal-setup (frame)
+              (if (display-graphic-p frame)
+                  (corfu-terminal-mode -1)
+                  (corfu-terminal-mode)))
+
+            (mapc 'corfu-terminal-setup (frame-list))
+            (add-hook 'after-make-frame-functions 'corfu-terminal-setup)
+          '';
+        };
+
         coterm = {
           enable = true;
           config = ''
             (coterm-mode)
-          '';
-        };
-
-        gruvbox-theme = {
-          enable = true;
-          config = ''
-            (load-theme 'gruvbox-dark-medium)
-          '';
-        };
-
-        general = {
-          enable = true;
-          config = ''
-            (general-evil-setup t)
-
-            (general-define-key
-              :states 'motion
-              :prefix "SPC"
-              :keymaps 'override
-              "SPC" 'save-buffer
-              "g" 'magit
-              "w" 'evil-window-map
-              "p" 'projectile-command-map
-              "s i" 'symbol-overlay-put
-              "s n" 'symbol-overlay-switch-forward
-              "s p" 'symbol-overlay-switch-backward
-              "s m" 'symbol-overlay-mode
-              "s x" 'symbol-overlay-remove-all
-              "b b" 'consult-buffer
-              "b e" 'eval-buffer
-              "b k" 'kill-buffer
-              "b l" 'list-buffers
-              "/ f" 'find-file
-              "/ r" 'consult-ripgrep
-              "/ g" 'consult-git-grep
-              "k f" 'describe-function
-              "k v" 'describe-variable
-              "k s" 'describe-symbol)
-
-            (general-define-key
-             :keymaps 'override
-             "M-/" 'avy-goto-char-timer
-             "C-." 'embark-act)
-
-            (general-def 'normal
-              "u" 'undo-fu-only-undo
-              "C-r" 'undo-fu-only-redo
-              "/" 'consult-line)
-
-            (general-def 'visual
-              "A" 'evil-mc-make-cursor-in-visual-selection-end
-              "I" 'evil-mc-make-cursor-in-visual-selection-beg)
-          '';
-        };
-
-        highlight-thing = {
-          enable = true;
-          config = ''
-            (global-highlight-thing-mode)
-          '';
-        };
-
-        indent-guide = {
-          enable = true;
-          config = ''
-            (indent-guide-global-mode)
-          '';
-        };
-
-        literate-calc-mode = {
-          enable = true;
-          config = ''
-            (setq literate-calc-mode-idle-time 0.1)
-            (literate-calc-mode)
-          '';
-        };
-
-        frames-only-mode = {
-          enable = true;
-          config = ''
-            (frames-only-mode)
-          '';
-        };
-
-        yasnippet = {
-          enable = true;
-          config = ''
-            (yas-global-mode)
-          '';
-        };
-
-        yasnippet-snippets = {
-          enable = true;
-          after = [ "yasnippet" ];
-        };
-
-        avy = {
-          enable = true;
-        };
-
-        blamer = {
-          enable = true;
-          config = ''
-            (global-blamer-mode 1)
-          '';
-        };
-
-        hyperbole = {
-          enable = true;
-        };
-
-        undo-fu = {
-          enable = true;
-        };
-
-        undo-fu-session = {
-          enable = true;
-          config = ''
-            (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
-            (global-undo-fu-session-mode)
-          '';
-        };
-
-        smooth-scrolling = {
-          enable = true;
-          config = ''
-            (setq smooth-scrolling-margin 5)
-            (smooth-scrolling-mode)
-          '';
-        };
-
-        projectile = {
-          enable = true;
-          config = ''
-            (projectile-mode)
-          '';
-        };
-
-        which-key = {
-          enable = true;
-          config = ''
-            (setq which-key-idle-delay 0.01)
-            (which-key-mode)
-          '';
-        };
-
-        smex = {
-          enable = true;
-          config = ''
-            (smex-initialize)
-          '';
-        };
-
-        treemacs = {
-          enable = true;
-        };
-
-        treemacs-evil = {
-          enable = true;
-          after = [ "treemacs" "evil" ];
-        };
-
-        treemacs-projectile = {
-          enable = true;
-          after = [ "treemacs" "projectile" ];
-        };
-
-        treemacs-icons-dired = {
-          enable = true;
-          after = [ "treemacs" "dired" ];
-          config = ''
-            (treemacs-icons-dired-mode)
-          '';
-        };
-
-        hl-todo = {
-          enable = true;
-          config = ''
-            (global-hl-todo-mode)
-          '';
-        };
-
-        magit = {
-          enable = true;
-        };
-
-        magit-todos = {
-          enable = true;
-          config = ''
-            (magit-todos-mode)
           '';
         };
 
@@ -454,33 +320,10 @@
           '';
         };
 
-        rainbow-delimiters = {
-          enable = true;
-          config = ''
-            (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-          '';
-        };
-
         diff-hl = {
           enable = true;
           config = ''
             (global-diff-hl-mode)
-          '';
-        };
-
-        savehist = {
-          enable = true;
-          config = ''
-            (savehist-mode)
-          '';
-        };
-
-        orderless = {
-          enable = true;
-          config = ''
-            (setq completion-styles '(orderless basic)
-                  completion-category-defaults nil
-                  completion-category-overrides '((file (styles partial-completion))))
           '';
         };
 
@@ -510,39 +353,135 @@
           hook = [ "(embark-collect-mode . consult-preview-at-point-mode)" ];
         };
 
-        corfu = {
-          enable = true;
-          config = ''
-            (setq
-              corfu-cycle t
-              corfu-auto t)
-            (global-corfu-mode)
-          '';
-        };
-
-        corfu-terminal = {
-          enable = true;
-          config = ''
-            (unless (display-graphic-p)
-              (corfu-terminal-mode +1))
-          '';
-        };
-
-        cape = {
+        evil = {
           enable = true;
           init = ''
-            (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-            (add-to-list 'completion-at-point-functions #'cape-file)
-            (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-            (add-to-list 'completion-at-point-functions #'cape-history)
-            ;; (add-to-list 'completion-at-point-functions #'cape-keyword)
-            ;; (add-to-list 'completion-at-point-functions #'cape-tex)
-            ;; (add-to-list 'completion-at-point-functions #'cape-sgml)
-            ;; (add-to-list 'completion-at-point-functions #'cape-rfc1345)
-            (add-to-list 'completion-at-point-functions #'cape-abbrev)
-            ;; (add-to-list 'completion-at-point-functions #'cape-dict)
-            ;; (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-            ;; (add-to-list 'completion-at-point-functions #'cape-line)
+            (setq evil-want-keybinding nil
+                  evil-want-Y-yank-to-eol t
+                  evil-search-wrap t
+                  evil-regexp-search t)
+          '';
+          config = ''
+            (evil-mode)
+          '';
+        };
+
+        evil-collection = {
+          enable = true;
+          after = [ "evil" ];
+          config = ''
+            (evil-collection-init)
+          '';
+        };
+
+        evil-mc = {
+          enable = true;
+          config = ''
+            (global-evil-mc-mode 1)
+          '';
+        };
+
+        evil-snipe = {
+          enable = true;
+          config = ''
+            (evil-snipe-mode 1)
+            (evil-snipe-override-mode 1)
+          '';
+        };
+
+        frames-only-mode = {
+          enable = true;
+          config = ''
+            (frames-only-mode)
+          '';
+        };
+
+        general = {
+          enable = true;
+          config = ''
+            (general-evil-setup t)
+
+            (general-define-key
+              :states 'motion
+              :prefix "SPC"
+              :keymaps 'override
+              "SPC" 'save-buffer
+              "g" 'magit
+              "w" 'evil-window-map
+              "p" 'projectile-command-map
+              "r" 'vertico-repeat
+              "s i" 'symbol-overlay-put
+              "s n" 'symbol-overlay-switch-forward
+              "s p" 'symbol-overlay-switch-backward
+              "s m" 'symbol-overlay-mode
+              "s x" 'symbol-overlay-remove-all
+              "b b" 'consult-buffer
+              "b e" 'eval-buffer
+              "b k" 'kill-buffer
+              "b l" 'list-buffers
+              "/ f" 'find-file
+              "/ r" 'consult-ripgrep
+              "/ g" 'consult-git-grep
+              "k f" 'describe-function
+              "k v" 'describe-variable
+              "k s" 'describe-symbol)
+
+            (general-define-key
+             :keymaps 'override
+             "M-/" 'avy-goto-char-timer
+             "C-." 'embark-act
+             "M-." 'embark-dwim
+             "M-s e" 'consult-isearch-history)
+
+            (general-define-key
+             :keymaps 'isearch-mode-map
+             "M-e" 'consult-isearch-history
+             "M-s l" 'consult-line
+             "M-s L" 'consult-line-multi)
+
+            (general-def 'normal
+              "u" 'undo-fu-only-undo
+              "C-r" 'undo-fu-only-redo
+              "/" 'consult-line)
+
+            (general-def 'visual
+              "A" 'evil-mc-make-cursor-in-visual-selection-end
+              "I" 'evil-mc-make-cursor-in-visual-selection-beg)
+
+            (general-define-key
+             :keymaps 'vertico-map
+             "C-'" 'vertico-quick-jump
+             "C-o" 'vertico-quick-exit
+             "C-i" 'vertico-quick-insert)
+          '';
+        };
+
+        highlight-thing = {
+          enable = true;
+          config = ''
+            (global-highlight-thing-mode)
+          '';
+        };
+
+        hl-todo = {
+          enable = true;
+          config = ''
+            (global-hl-todo-mode)
+          '';
+        };
+
+        indent-guide = {
+          enable = true;
+          config = ''
+            (indent-guide-global-mode)
+          '';
+        };
+
+        literate-calc-mode = {
+          enable = true;
+          config = ''
+            (setq literate-calc-mode-idle-time 0.1)
+            (literate-calc-mode)
           '';
         };
 
@@ -553,8 +492,83 @@
           '';
         };
 
-        consult = {
+        magit-todos = {
           enable = true;
+          config = ''
+            (magit-todos-mode)
+          '';
+        };
+
+        orderless = {
+          enable = true;
+          config = ''
+            (setq completion-styles '(orderless basic)
+                  completion-category-defaults nil
+                  completion-category-overrides '((file (styles partial-completion))))
+          '';
+        };
+
+        projectile = {
+          enable = true;
+          config = ''
+            (projectile-mode)
+          '';
+        };
+
+        rainbow-delimiters = {
+          enable = true;
+          config = ''
+            (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+          '';
+        };
+
+        savehist = {
+          enable = true;
+          config = ''
+            (savehist-mode)
+            (add-to-list 'savehist-additional-variables #'vertico-repeat-history)
+          '';
+        };
+
+        smex = {
+          enable = true;
+          config = ''
+            (smex-initialize)
+          '';
+        };
+
+        smooth-scrolling = {
+          enable = true;
+          config = ''
+            (setq smooth-scrolling-margin 5)
+            (smooth-scrolling-mode)
+          '';
+        };
+
+        treemacs-evil = {
+          enable = true;
+          after = [ "treemacs" "evil" ];
+        };
+
+        treemacs-projectile = {
+          enable = true;
+          after = [ "treemacs" "projectile" ];
+        };
+
+        treemacs-icons-dired = {
+          enable = true;
+          after = [ "treemacs" "dired" ];
+          config = ''
+            (treemacs-icons-dired-mode)
+          '';
+        };
+
+        undo-fu-session = {
+          enable = true;
+          config = ''
+            (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+            (global-undo-fu-session-mode)
+          '';
         };
 
         vertico = {
@@ -564,8 +578,43 @@
           '';
         };
 
-        cuda-mode = {
+        vertico-grid = {
           enable = true;
+          config = ''
+            ;; TODO: Enable this only sometimes.
+            ;; (vertico-grid-mode)
+          '';
+        };
+
+        vertico-indexed = {
+          enable = true;
+          config = ''
+            (vertico-indexed-mode)
+          '';
+        };
+
+        vertico-quick.enable = true;
+
+        vertico-mouse = {
+          enable = true;
+          config = ''
+            (vertico-mouse-mode)
+          '';
+        };
+
+        vertico-repeat = {
+          enable = true;
+          config = ''
+            (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+          '';
+        };
+
+        which-key = {
+          enable = true;
+          config = ''
+            (setq which-key-idle-delay 0.01)
+            (which-key-mode)
+          '';
         };
 
         whitespace-cleanup-mode = {
@@ -573,6 +622,18 @@
           config = ''
             (global-whitespace-cleanup-mode)
           '';
+        };
+
+        yasnippet = {
+          enable = true;
+          config = ''
+            (yas-global-mode)
+          '';
+        };
+
+        yasnippet-snippets = {
+          enable = true;
+          after = [ "yasnippet" ];
         };
       };
 
@@ -582,8 +643,7 @@
     };
   };
 
-
-  exa = {
+  eza = {
     enable = true;
     enableAliases = true;
   };
@@ -595,8 +655,8 @@
     settings = {
       main = {
         term = "xterm-256color";
-        font = "Tamsyn:size=10";
-        dpi-aware = "yes";
+        font = "Tamsyn:size=12";
+        dpi-aware = "no";
       };
 
       mouse = {
@@ -604,35 +664,29 @@
       };
 
       colors = {
-        background = "282828";
-        foreground = "ebdbb2";
-        regular0 = "282828";
-        regular1 = "cc241d";
-        regular2 = "98971a";
-        regular3 = "d79921";
-        regular4 = "458588";
-        regular5 = "b16286";
-        regular6 = "689d6a";
-        regular7 = "a89984";
-        bright0 = "928374";
-        bright1 = "fb4934";
-        bright2 = "b8bb26";
-        bright3 = "fabd2f";
-        bright4 = "83a598";
-        bright5 = "d3869b";
-        bright6 = "8ec07c";
-        bright7 = "ebdbb2";
+        # Ayu dark theme.
+        background = "000919";
+        foreground = "c3c0bb";
+
+        regular0 = "242936"; # black
+        regular1 = "f28779"; # red
+        regular2 = "d5ff80"; # green
+        regular3 = "ffd173"; # yellow
+        regular4 = "73d0ff"; # blue
+        regular5 = "dfbfff"; # magenta
+        regular6 = "5ccfe6"; # cyan
+        regular7 = "cccac2"; # white
+
+        bright0 = "fcfcfc"; # bright black
+        bright1 = "f07171"; # bright red
+        bright2 = "86b300"; # bright gree
+        bright3 = "f2ae49"; # bright yellow
+        bright4 = "399ee6"; # bright blue
+        bright5 = "a37acc"; # bright magenta
+        bright6 = "55b4d4"; # bright cyan
+        bright7 = "5c6166"; # bright white
       };
     };
-  };
-
-  gh = {
-    enable = false;
-  };
-
-  gpg = {
-    enable = true;
-    homedir = "${config.xdg.dataHome}/gnupg";
   };
 
   git = {
@@ -660,7 +714,7 @@
     delta = {
       enable = true;
       options = {
-        syntax-theme = "Dracula";
+        syntax-theme = "ayu";
         line-numbers = true;
       };
     };
@@ -680,19 +734,14 @@
     };
   };
 
-  ion = {
-    enable = true;
-  };
-
   mpv = {
     enable = true;
     config = {
-      #gpu-api = "vulkan";
-      #gpu-context = "wayland";
-      #gpu-context = "x11vk";
-      #hwdec = "vaapi";
-      #profile = "gpu-hq";
-      #spirv-compiler = "shaderc";
+      gpu-api = "vulkan";
+      gpu-context = "wayland";
+      hwdec = "vaapi";
+      profile = "gpu-hq";
+      spirv-compiler = "shaderc";
     };
   };
 
@@ -713,34 +762,22 @@
     '';
   };
 
-  starship = {
-    enable = true;
-    settings = {
-      add_newline = false;
-      character = {
-        success_symbol = "[>](bold green)";
-        error_symbol = "[x](bold red)";
-        vicmd_symbol = "[<](bold green)";
-      };
-    };
-  };
-
   waybar = {
     enable = true;
+    systemd.enable = true;
+
     settings = {
       mainBar = {
-        # setting monitor to desky to force a rebuild :)
-        output = [ "HDMI-A-1" ];
         layer = "top";
         position = "top";
         height = 24;
+
         modules-left = [
-          "wlr/workspaces"
-          "wlr/mode"
-          "custom/weather" 
-          "custom/spotify"
+          "hyprland/workspaces"
         ];
+
         modules-center = [ "hyprland/window" ];
+
         modules-right = [
           "pulseaudio"
           "network"
@@ -751,37 +788,34 @@
           "tray"
           "clock"
         ];
+
         "wlr/workspaces" = {
           disable-scroll = true;
           all-outputs = false;
           on-click = "activate";
-          format = "{icon}";
-          format-icons = {
-              "1" = "󰖟";
-              "2" = "";
-              "active" = "";
-              "default" = "󰝦";
-          };
         };
+
         "wlr/mode" = { format = "<span style=\"italic\">{}</span>"; };
         "tray" = {
           # "icon-size" = 21,
           "spacing" = 10;
         };
-        "clock" = { "format-alt" = "{:%Y-%m-%d}"; "on-click" = ""; };
-        "cpu"= { 
-          "format"= "{usage}% 󰍛"; 
-        };
-        "memory"= { "format"= "{}% "; };
 
-        "temperature" = { 
-          "critical-threshold" = 80;  
-          "format" = "{}℃  󰏈"; 
+        "clock" = { "format-alt" = "{:%Y-%m-%d}"; "on-click" = ""; };
+        "cpu" = {
+          "format" = "{usage}% 󰍛";
+        };
+
+        "memory" = { "format"= "{}% "; };
+
+        "temperature" = {
+          "critical-threshold" = 80;
+          "format" = "{}℃  󰏈";
           "format-critical" = "{}℃ 󰇺";
           "interval" = 5;
         };
 
-        "battery"= {
+        "battery" = {
             "bat"= "BAT0";
             "states"= {
                 # "good"= 95;
@@ -793,13 +827,14 @@
             # "format-full"= "";
             "format-icons"= ["" "" "" "" ""];
         };
-        "network"= {
-            # "interface"= "wlp2s0"; # (Optional) To force the use of this interface
+
+        "network" = {
             "format-wifi"= "{essid} ({signalStrength}%) ";
             "format-ethernet"= "{ifname}= {ipaddr}/{cidr} ";
             "format-disconnected"= "Disconnected ⚠";
         };
-        "pulseaudio"= {
+
+        "pulseaudio" = {
             #"scroll-step"= 1;
             "format"= "{volume}% {icon}";
             "format-bluetooth"= "{volume}% {icon}";
@@ -815,21 +850,10 @@
             };
             "on-click"= "pavucontrol";
         };
-        "custom/spotify"= {
-            "format"= " {}";
-            "max-length"= 40;
-            "interval"= 10; # Remove this if your script is endless and write in loop
-            "exec"= "$HOME/.config/waybar/mediaplayer.sh 2> /dev/null"; # Script in resources folder
-            "exec-if"= "pgrep spotify || pgrep ncspot";
-        };
-        "hyprland/window" = { 
-          "format" = {}; 
+
+        "hyprland/window" = {
+          "format" = {};
           "seperate-outputs" = true;
-        };
-        "custom/weather" = {
-          format = "{}";
-          exec = "curl -s wttr.in/\?format=\"Urbana:+%C,+%t+%w\"";
-          interval = 1800;
         };
       };
     };

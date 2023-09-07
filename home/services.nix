@@ -20,7 +20,7 @@
     extraConfig = ''
       [mode=do-not-disturb]
       invisible=1
-        '';
+    '';
   };
 
   swayidle =
@@ -48,19 +48,6 @@
     enable = false;
     latitude = 40.1019564;
     longitude = -88.2293502;
-  };
-
-  gpg-agent = {
-    enable = false;
-    enableSshSupport = true;
-    pinentryFlavor = "curses";
-    sshKeys = [
-      "04D42E929F2A312225856CD740A092BEE315D631"
-    ];
-    extraConfig = ''
-      homedir ${config.programs.gpg.homedir}
-      allow-loopback-pinentry
-    '';
   };
 
   mpd = {

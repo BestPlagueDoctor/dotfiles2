@@ -7,105 +7,94 @@ let
 
   files = "${home}/files";
   common = "${home}/common";
+
+  # TODO: Factor this out along with nixpkgs.hostPlatform
+  nix-misc = inputs.nix-misc.packages.x86_64-linux;
 in
 {
   username = user.login;
   homeDirectory = home;
-  stateVersion = lib.mkForce "21.05";
+  stateVersion = sys.system.stateVersion;
 
   packages =
     ## Lang Specific ##
     (with pkgs; [
       gnuapl
+      nil
       shellcheck
     ]) ++
 
     ## CLI Utils ##
+    (with nix-misc; [
+      git-fuzzy
+    ]) ++
+
     (with pkgs; [
       bottom
+      btop
+      cloc
       comma
       direnv
+      duf
       dos2unix
-      du-dust
+      fasd
       fd
       ffmpeg
+      file
       gh
-      git-crypt
-      google-cloud-sdk
       htop
       hyperfine
       joshuto
-      libva-utils
-      ncdu
-      pandoc
-      powertop
-      procs
-      ripgrep
-      sd
-      sops
-      tldr
-      xplr
-
-      btop
-      cloc
-      fasd
-      file
       jq
       killall
       libnotify
+      libva-utils
       lsof
       mediainfo
+      miniserve
+      ncdu
       nix-tree
-      p7zip
+      nurl
+      onefetch
+      pandoc
       patchutils
+      powertop
+      procs
       pstree
+      ripgrep
+      scc
       sl
+      sops
       strace
       tcpdump
+      tldr
       tmux
-      trash-cli
       unrar
       unzip
       xplr
       zellij
       zip
-
-      cudatoolkit
-      #cudaPackages.nsight_systems
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+    ]) ++
 
     ## Networking ##
     (with pkgs; [
+      remmina
       bluetuith
       croc
-      curlie
-      dog
       gping
       iperf
       ipfs
-      miraclecast
-      mosh
-      remmina
-      scrcpy
-      w3m
-      wayvnc
-      wireshark
-      xh
-
       ldns
+      mosh
       nmap
+      scrcpy
       speedtest-cli
+      w3m
       wget
       whois
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+      wireshark
+      xh
+    ]) ++
 
     ## Privacy and Security ##
     (with pkgs; [
@@ -122,11 +111,7 @@ in
       yubikey-personalization
       yubikey-personalization-gui
       yubioath-flutter
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+    ]) ++
 
     ## Desktop Environment ##
     (with pkgs; [
@@ -142,8 +127,6 @@ in
       grim
       imv
       nomacs
-      river
-      session-desktop-appimage
       simple-scan
       slurp
       swappy
@@ -151,74 +134,55 @@ in
       wl-clipboard
       wlr-randr
 
+      xdg-user-dirs
+      xdg-utils
+      xorg.xeyes
+      xorg.xkill
+
       breeze-icons
       gnome.adwaita-icon-theme
       material-design-icons
 
       fira-code
       fira-code-symbols
+      hack-font
       hicolor-icon-theme
       noto-fonts
       noto-fonts-cjk
       noto-fonts-emoji
-      hack-font
+      tamsyn
 
       gtk3
 
-      tamsyn
-      xdg-user-dirs
-      xdg-utils
-      xorg.xeyes
-      xorg.xkill
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+      vial
+    ]) ++
 
     ## Windows ##
     (with pkgs; [
       ntfs3g
-      #wineWowPackages.stable
-
       dosfstools
       efibootmgr
       exfatprogs
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+    ]) ++
 
     ## Media ##
     (with pkgs; [
+      easyeffects
       mpc_cli
       pamixer
       pavucontrol
       streamlink
       vlc
       yt-dlp
-      spotify
-      ncspot
       playerctl
-      easyeffects
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+    ]) ++
 
     ## Communication ##
     (with pkgs; [
       discord-canary
       element-desktop
-      kotatogram-desktop
-      slack
+      weechat
       zoom-us
-      #weechat
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
     ]);
 
   file = {
@@ -247,30 +211,14 @@ in
       '';
     };
 
-    chell = {
-      target = ".local/bin/chell";
-      executable = true;
-      text = ''
-        #!/bin/sh
-        ${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal -r &
-        ${pkgs.xdg-desktop-portal-gtk}/libexec/xdg-desktop-portal-gtk -r &
-        ${pkgs.xdg-desktop-portal-wlr}/libexec/xdg-desktop-portal-wlr -l INFO -r &
-      '';
-    };
-
-    lock = {
-      target = ".local/bin/lock";
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-        ${pkgs.playerctl}/bin/playerctl -a pause
-        ${sys.security.wrapperDir}/doas ${pkgs.physlock}/bin/physlock
-        #${pkgs.vbetool}/bin/vbetool dpms off
-      '';
+    emacs-ayu-dark = {
+      source = "${root}/conf/emacs/ayu-dark-theme.el";
+      target = ".emacs.d/ayu-dark-theme.el";
     };
   };
 
   sessionPath = [ "${home}/.local/bin" ];
+
 
   sessionVariables = {
     # General
@@ -300,9 +248,13 @@ in
     diff = "delta";
     g = "git";
     open = "xdg-open";
+    ovpn = "openvpn3";
     rlf = "readlink -f";
+    tf = "terraform";
     zc = "zcalc -r";
     zl = "zellij";
+    bz = "bazel";
+    ms = "miniserve -HWqrgzl --readme --index index.html";
 
     noti = "noti ";
     doas = "doas ";
@@ -317,7 +269,5 @@ in
     vim = "$EDITOR -t";
 
     rscp = "rsync -ahvP";
-
-    hl = "exec Hyprland";
   };
 }

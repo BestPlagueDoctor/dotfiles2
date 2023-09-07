@@ -1,4 +1,4 @@
-{ config, pkgs, lib, modulesPath, inputs, root, user, domain, ... }:
+{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
@@ -121,8 +121,6 @@
   };
 
   networking = {
-    inherit domain;
-
     hostId = "c2c58d17";
     hostName = "lithium";
 
@@ -408,7 +406,6 @@
       u2f.enable = true;
 
       loginLimits = [{
-        domain = "*";
         type = "soft";
         item = "nofile";
         value = "65536";

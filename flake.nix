@@ -2,104 +2,127 @@
   description = "Nix-based config";
 
   inputs = {
-    stable.url = github:nixos/nixpkgs/nixos-22.05;
-    unstable.url = github:nixos/nixpkgs/nixos-unstable;
-    master.url = github:nixos/nixpkgs;
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05-small";
 
-    nur.url = github:nix-community/nur;
-    sops-nix.url = github:Mic92/sops-nix;
-    home-manager.url = github:nix-community/home-manager;
+    deploy-rs.url = "github:serokell/deploy-rs";
+    home-manager.url = "github:nix-community/home-manager";
+    nixos-hardware.url = "github:nixos/nixos-hardware";
+    nur.url = "github:nix-community/nur";
 
-    emacs-overlay.url = github:nix-community/emacs-overlay;
-    emacs-overlay.inputs.nixpkgs.follows = "unstable";
+    nix-misc = {
+      url = "github:armeenm/nix-misc";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    hyprland.url = github:hyprwm/Hyprland;
-    hyprland.inputs.nixpkgs.follows = "unstable";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-stable.follows = "nixpkgs-stable";
+    };
 
-    utils.url = github:numtide/flake-utils;
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v0.3.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    emacs-overlay = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-stable.follows = "nixpkgs-stable";
+    };
+
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-on-droid = {
+      url = "github:t184256/nix-on-droid";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, ... }:
-    inputs.utils.lib.eachDefaultSystem (system:
-      let
-        defaultFlake = inputs.unstable;
-        config = {
-          allowUnfree = true;
-          contentAddressedByDefault = false;
-        };
+  outputs = inputs@{ self, nixpkgs, ... }: let
+    config = {
+      allowUnfree = true;
+      contentAddressedByDefault = false;
+    };
 
-        overlays = [
-          (import ./overlay)
-          inputs.emacs-overlay.overlays.default
+    overlays = [
+      (import ./overlay { inherit inputs; })
+      inputs.emacs-overlay.overlays.default
+    ];
+
+    forAllSystems = f: nixpkgs.lib.genAttrs [
+      "x86_64-linux"
+      "aarch64-linux"
+    ] (system: f system (
+      import nixpkgs { inherit system config overlays; }
+    ));
+
+    root = ./.;
+    user = {
+      login = "sam";
+      name = "Sam Knight";
+      email = "sknight5@illinois.edu";
+    };
+
+    modules = [
+      inputs.home-manager.nixosModules.home-manager
+      inputs.hyprland.nixosModules.default
+      inputs.nur.nixosModules.nur
+      inputs.sops-nix.nixosModules.sops
+      inputs.lanzaboote.nixosModules.lanzaboote
+      { nixpkgs = { inherit config overlays; }; }
+      { _module.args = { inherit inputs root user; }; }
+      ./modules
+    ];
+
+  in {
+    nixosConfigurations = {
+      lithium = nixpkgs.lib.nixosSystem {
+        modules = modules ++ [
+          ./hosts/lithium
+          ./home
         ];
+      };
 
-        pkgs = rec {
-          default = import defaultFlake {
-            inherit config system overlays;
-          };
-
-          stable = import inputs.stable {
-            inherit config system overlays;
-          };
-
-          unstable = import inputs.unstable {
-            inherit config system overlays;
-          };
-
-          master = import inputs.master {
-            inherit config system overlays;
-          };
-
-          stdenv = default.stdenvNoCC;
-          mkShell = default.mkShell.override { inherit stdenv; };
-        };
-        lib = defaultFlake.lib;
-
-        root = ./.;
-        domain = "armeen.org";
-        user = rec {
-          login = "sam";
-          name = "Sam Knight";
-          email = "sammknight@protonmail.com";
-        };
-
-        modules = [
-          inputs.home-manager.nixosModules.home-manager
-          inputs.hyprland.nixosModules.default
-          inputs.nur.nixosModules.nur
-          inputs.sops-nix.nixosModules.sops
-          { nixpkgs = { inherit config overlays; }; }
-          { _module.args = { inherit inputs root domain user; }; }
-          ./modules
+      magi = nixpkgs.lib.nixosSystem {
+        modules = modules ++ [
+          ./hosts/magi
+          ./home
         ];
+      };
 
-    in {
-      packages = {
-        nixosConfigurations = {
-          magi = inputs.unstable.lib.nixosSystem {
-            modules = modules ++ [
-              ./hosts/magi
-              ./homes/full
-            ];
-          };
-          navi = inputs.unstable.lib.nixosSystem {
-            modules = modules ++ [
-              ./hosts/navi
-              ./homes/full
-            ];
-          };
-          lithium = inputs.unstable.lib.nixosSystem {
-            modules = modules ++ [
-              ./hosts/lithium
-              ./homes/full
-            ];
+      navi = nixpkgs.lib.nixosSystem {
+        modules = modules ++ [
+          ./hosts/navi
+          ./home
+        ];
+      };
+    };
+
+    deploy = {
+      nodes = {
+        lithium = {
+          hostname = "lithium";
+          profiles.system = {
+            user = "root";
+            sudo = "doas -u";
+            path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.lithium;
           };
         };
       };
+    };
 
-      devShells.default = pkgs.mkShell {
-        packages = with pkgs.default; [
+    devShells = forAllSystems (system: pkgs: with pkgs; {
+      default = mkShell {
+        packages = [
+          inputs.deploy-rs.packages.${system}.default
+          nil
           nixUnstable
+          nvd
           openssl
           sops
         ];
@@ -109,4 +132,7 @@
         '';
       };
     });
+
+    checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) inputs.deploy-rs.lib;
+  };
 }
