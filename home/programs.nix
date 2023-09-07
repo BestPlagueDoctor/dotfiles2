@@ -31,13 +31,6 @@
     };
   };
 
-  broot = {
-    enable = true;
-    settings = {
-      modal = true;
-    };
-  };
-
   direnv = {
     enable = true;
     nix-direnv.enable = true;
@@ -655,7 +648,7 @@
     settings = {
       main = {
         term = "xterm-256color";
-        font = "Tamsyn:size=12";
+        font = "Tamsyn:size=10";
         dpi-aware = "no";
       };
 

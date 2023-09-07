@@ -30,7 +30,6 @@ in
     ]) ++
 
     (with pkgs; [
-      bottom
       btop
       comma
       direnv
@@ -43,7 +42,6 @@ in
       gh
       htop
       hyperfine
-      joshuto
       jq
       killall
       libnotify
@@ -61,11 +59,9 @@ in
       procs
       ripgrep
       scc
-      sl
       sops
       strace
       tcpdump
-      tldr
       unrar
       unzip
       xplr
@@ -251,5 +247,7 @@ in
     vim = "$EDITOR -t";
 
     rscp = "rsync -ahvP";
+
+    hl = "exec Hyprland"
   };
 }
