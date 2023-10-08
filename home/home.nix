@@ -10,6 +10,9 @@ let
 
   # TODO: Factor this out along with nixpkgs.hostPlatform
   nix-misc = inputs.nix-misc.packages.x86_64-linux;
+  editor = lib.getBin (pkgs.writeShellScript "editor" ''
+    exec ${lib.getBin config.services.emacs.package}/bin/emacsclient -ct $@
+  '');
 in
 {
   username = user.login;
@@ -17,13 +20,6 @@ in
   stateVersion = sys.system.stateVersion;
 
   packages =
-    ## Lang Specific ##
-    (with pkgs; [
-      gnuapl
-      nil
-      shellcheck
-    ]) ++
-
     ## CLI Utils ##
     (with nix-misc; [
       git-fuzzy
@@ -31,6 +27,7 @@ in
 
     (with pkgs; [
       btop
+      bubblewrap
       comma
       direnv
       duf
@@ -62,9 +59,7 @@ in
       sops
       strace
       tcpdump
-      unrar
       unzip
-      xplr
       zellij
       zip
     ]) ++
@@ -72,28 +67,16 @@ in
     ## Networking ##
     (with pkgs; [
       remmina
+      sunshine
       bluetuith
-      croc
-      gping
       iperf
-      ipfs
       ldns
-      mosh
       nmap
       scrcpy
       speedtest-cli
-      w3m
       wget
       whois
       wireshark
-      xh
-    ]) ++
-
-    ## Privacy and Security ##
-    (with pkgs; [
-      bubblewrap
-      usbguard
-      veracrypt
     ]) ++
 
     ## Desktop Environment ##
@@ -144,6 +127,7 @@ in
       dosfstools
       efibootmgr
       exfatprogs
+      virt-manager
     ]) ++
 
     ## Media ##
@@ -153,14 +137,17 @@ in
       pamixer
       pavucontrol
       vlc
-      yt-dlp
       playerctl
+      spotify
+      ncspot
+      prismlauncher
     ]) ++
 
     ## Communication ##
     (with pkgs; [
       discord-canary
       zoom-us
+      kotatogram-desktop
     ]);
 
   file = {
@@ -216,9 +203,7 @@ in
     # Cleaning up home dir
     CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
     IPFS_PATH = "${config.xdg.dataHome}/ipfs";
-    EDITOR = lib.getBin (pkgs.writeShellScript "editor" ''
-      exec ${lib.getBin config.services.emacs.package}/bin/emacsclient -ct $@
-    '');
+    EDITOR = editor;
   };
 
   shellAliases = {

@@ -19,19 +19,33 @@
     initrd = {
       #includeDefaultModules = false;
       verbose = false;
-      kernelModules = [ "nvme" "nvidia" ];
+      # in case i lose it
+      #kernelModules = [ "nvme" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
+      kernelModules = [ "nvme" ];
+      #blacklistedKernelModules = [ "nvidia" "nouveau" ];
     };
-
     #supportedFilesystems = [ "zfs" ];
 
     consoleLogLevel = 0;
+    #kernelModules = [
+    #  "ib_umad"
+    #  "ib_ipoib"
+    #];
 
-    kernelModules = [
-      "ib_umad"
-      "ib_ipoib"
-    ];
+    kernelModules = [ "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
+    blacklistedKernelModules = [ "nvidia" "nouveau" ];
+    kernelParams = [ "amd_iommu=on" "fbcon=map:1" ];
+    #extraModprobeConfig = "options kvm_intel nested=1 vfio-pci ids=10de:2484, 10de:228b ";
 
-    #kernelPackages = pkgs.callPackage ./kernel.nix { };
+    postBootCommands = ''
+      DEVS="0000:07:00.0 0000:07:00.1"
+
+      for DEV in $DEVS; do
+        echo "vfio-pci" > /sys/bus/pci/devices/$DEV/driver_override
+      done
+      modprobe -i vfio-pci
+    '';
+
 
 /*
 
@@ -130,6 +144,7 @@
       useDHCP = true;
       wakeOnLan.enable = true;
     };
+    firewall.allowedTCPPorts = [ 8080 ];
   };
 
   hardware = {
@@ -151,6 +166,7 @@
 
     nvidia = {
       package = config.boot.kernelPackages.nvidiaPackages.stable;
+      open = true;
       modesetting.enable = true;
     };
 
@@ -343,7 +359,6 @@
     */
   };
 
-  virtualisation.virtualbox.host.enable = true;
 
   systemd = {
     watchdog.rebootTime = "15s";
@@ -393,7 +408,7 @@
     doas = {
       enable = true;
       extraRules = [{
-        groups = [ "wheel" ];
+        groups = [ "wheel" "libvirtd" ];
         keepEnv = true;
         noPass = false;
       }];
@@ -414,18 +429,19 @@
 
   virtualisation = {
     spiceUSBRedirection.enable = true;
+    virtualbox.host.enable = true;
     #waydroid.enable = true;
 
     libvirtd = {
-      enable = false;
+      enable = true;
       qemu = {
         swtpm.enable = true;
         ovmf = {
           enable = true;
-          package = (pkgs.OVMF.override {
-            secureBoot = true;
-            tpmSupport = true;
-          });
+          #package = (pkgs.OVMF.override {
+          #  secureBoot = true;
+          #  tpmSupport = true;
+          #});
         };
       };
     };

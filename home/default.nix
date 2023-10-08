@@ -16,8 +16,7 @@ in
     systemd = import ./systemd.nix args;
     xdg = import ./xdg.nix args;
     gtk = import ./gtk.nix args;
-
-    imports = [ config.nur.repos.rycee.hmModules.emacs-init ];
+    wayland = import ./wayland.nix args;
 
     fonts.fontconfig.enable = lib.mkForce true;
   };
