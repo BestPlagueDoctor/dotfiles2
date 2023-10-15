@@ -4,10 +4,10 @@
   windowManager.hyprland = {
     enable = true;
     settings = {
-      env = "WLR_DRM_DEVICES,/dev/dri/card1";
+      env = "WLR_DRM_DEVICES,/dev/dri/card0";
       monitor = [
         "DP-2,1024x768,0x0,1"
-        "HDMI-A-1,1920x1080@165,1024x0,1"
+        "HDMI-A-1,1920x1080@144,1024x0,1"
         "DP-1,1920x1200,2944x0,1"
         ",preferred,auto,1"
       ];

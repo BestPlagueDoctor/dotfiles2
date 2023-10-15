@@ -20,4 +20,4 @@ in
 
     fonts.fontconfig.enable = lib.mkForce true;
   };
-}
+} 

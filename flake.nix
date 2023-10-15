@@ -9,6 +9,7 @@
     home-manager.url = "github:nix-community/home-manager";
     nixos-hardware.url = "github:nixos/nixos-hardware";
     nur.url = "github:nix-community/nur";
+    ssbm.url = "github:djanatyn/ssbm-nix";
 
     nix-misc = {
       url = "github:armeenm/nix-misc";
@@ -68,14 +69,20 @@
       email = "sknight5@illinois.edu";
     };
 
-    modules = [
+    hmModules = [
+#      inputs.ssbm.homeManagerModule
+      { _module.args = {inherit inputs root user; }; }
+    ];
+
+
+    modules = hmModules ++ [
+      inputs.ssbm.nixosModule
       inputs.home-manager.nixosModules.home-manager
       inputs.hyprland.nixosModules.default
       inputs.nur.nixosModules.nur
       inputs.sops-nix.nixosModules.sops
       inputs.lanzaboote.nixosModules.lanzaboote
       { nixpkgs = { inherit config overlays; }; }
-      { _module.args = { inherit inputs root user; }; }
       ./modules
     ];
 
@@ -135,4 +142,4 @@
 
     checks = builtins.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) inputs.deploy-rs.lib;
   };
-}
+} 

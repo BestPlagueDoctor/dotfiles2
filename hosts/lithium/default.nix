@@ -3,6 +3,13 @@
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
+
+  ssbm = {
+    overlay.enable = true;
+    gcc.oc-kmod.enable = true;
+    gcc.rules.enable = true;
+  };
+
   fileSystems = {
     "/boot" = {
       device = "/dev/disk/by-label/boot";
@@ -32,7 +39,7 @@
     #  "ib_ipoib"
     #];
 
-    kernelModules = [ "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
+    kernelModules = [ "kvm-amd" "kvm-intel" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
     blacklistedKernelModules = [ "nvidia" "nouveau" ];
     kernelParams = [ "amd_iommu=on" "fbcon=map:1" ];
     #extraModprobeConfig = "options kvm_intel nested=1 vfio-pci ids=10de:2484, 10de:228b ";
@@ -164,11 +171,11 @@
       ];
     };
 
-    nvidia = {
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
-      open = true;
-      modesetting.enable = true;
-    };
+    #nvidia = {
+    #  package = config.boot.kernelPackages.nvidiaPackages.stable;
+    #  open = true;
+    #  modesetting.enable = true;
+    #};
 
     sane = {
       enable = true;
@@ -348,7 +355,7 @@
       rules = builtins.readFile ./conf/usbguard/rules.conf;
     };
 
-    xserver.videoDrivers = [ "amdgpu" "nvidia" ];
+    xserver.videoDrivers = [ "amdgpu" ];
 
     /*
     zfs = {
@@ -408,7 +415,7 @@
     doas = {
       enable = true;
       extraRules = [{
-        groups = [ "wheel" "libvirtd" ];
+        groups = [ "wheel" ];
         keepEnv = true;
         noPass = false;
       }];
@@ -434,6 +441,7 @@
 
     libvirtd = {
       enable = true;
+      qemuOvmf = true;
       qemu = {
         swtpm.enable = true;
         ovmf = {
@@ -446,8 +454,9 @@
       };
     };
 
+    # dont think i need this
     docker = {
-      enable = true;
+      enable = false;
       enableNvidia = true;
     };
 
@@ -481,6 +490,7 @@
           "scanner"
           "wheel"
           "vboxusers"
+          "qemu-libvirtd"
         ];
       };
     };
