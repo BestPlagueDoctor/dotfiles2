@@ -1,4 +1,4 @@
-{ config, pkgs, lib, user, domain, ... }:
+{ config, pkgs, lib, user, ... }:
 
 {
   boot = {
@@ -20,7 +20,6 @@
   nixpkgs.hostPlatform = "x86_64-linux";
 
   networking = {
-    inherit domain;
     hostName = "magi";
 
     defaultGateway = "10.0.0.1";

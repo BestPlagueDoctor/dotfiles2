@@ -1,8 +1,8 @@
-{ config, pkgs, lib, root, user, domain, inputs, ... }:
+{ config, pkgs, lib, root, user, inputs, ... }:
 
 let
   args = {
-    inherit pkgs lib root user domain inputs;
+    inherit pkgs lib root user inputs;
     sys = config;
     config = config.home-manager.users."${user.login}";
   };
@@ -16,10 +16,8 @@ in
     systemd = import ./systemd.nix args;
     xdg = import ./xdg.nix args;
     gtk = import ./gtk.nix args;
-
-    imports = [ config.nur.repos.rycee.hmModules.emacs-init ];
+    wayland = import ./wayland.nix args;
 
     fonts.fontconfig.enable = lib.mkForce true;
-    manual.manpages.enable = false;
   };
-}
+} 

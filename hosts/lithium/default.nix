@@ -1,7 +1,14 @@
-{ config, pkgs, lib, modulesPath, inputs, root, user, domain, ... }:
+{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+
+
+  ssbm = {
+    overlay.enable = true;
+    gcc.oc-kmod.enable = true;
+    gcc.rules.enable = true;
+  };
 
   fileSystems = {
     "/boot" = {
@@ -19,19 +26,33 @@
     initrd = {
       #includeDefaultModules = false;
       verbose = false;
-      kernelModules = [ "nvme" "nvidia" ];
+      # in case i lose it
+      #kernelModules = [ "nvme" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
+      kernelModules = [ "nvme" ];
+      #blacklistedKernelModules = [ "nvidia" "nouveau" ];
     };
-
     #supportedFilesystems = [ "zfs" ];
 
     consoleLogLevel = 0;
+    #kernelModules = [
+    #  "ib_umad"
+    #  "ib_ipoib"
+    #];
 
-    kernelModules = [
-      "ib_umad"
-      "ib_ipoib"
-    ];
+    kernelModules = [ "kvm-amd" "kvm-intel" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
+    blacklistedKernelModules = [ "nvidia" "nouveau" ];
+    kernelParams = [ "amd_iommu=on" "fbcon=map:1" ];
+    #extraModprobeConfig = "options kvm_intel nested=1 vfio-pci ids=10de:2484, 10de:228b ";
 
-    #kernelPackages = pkgs.callPackage ./kernel.nix { };
+    postBootCommands = ''
+      DEVS="0000:07:00.0 0000:07:00.1"
+
+      for DEV in $DEVS; do
+        echo "vfio-pci" > /sys/bus/pci/devices/$DEV/driver_override
+      done
+      modprobe -i vfio-pci
+    '';
+
 
 /*
 
@@ -121,8 +142,6 @@
   };
 
   networking = {
-    inherit domain;
-
     hostId = "c2c58d17";
     hostName = "lithium";
 
@@ -132,6 +151,7 @@
       useDHCP = true;
       wakeOnLan.enable = true;
     };
+    firewall.allowedTCPPorts = [ 8080 ];
   };
 
   hardware = {
@@ -151,10 +171,11 @@
       ];
     };
 
-    nvidia = {
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
-      modesetting.enable = true;
-    };
+    #nvidia = {
+    #  package = config.boot.kernelPackages.nvidiaPackages.stable;
+    #  open = true;
+    #  modesetting.enable = true;
+    #};
 
     sane = {
       enable = true;
@@ -179,10 +200,7 @@
     nixPath = lib.mkForce [ "nixpkgs=${config.nix.registry.nixpkgs.flake}" ];
 
     registry = {
-      nixpkgs.flake = inputs.unstable;
-      ns.flake = inputs.stable;
-      nu.flake = inputs.unstable;
-      nur.flake = inputs.nur;
+      nixpkgs.flake = inputs.nixpkgs;
     };
 
     #buildMachines = [
@@ -337,7 +355,7 @@
       rules = builtins.readFile ./conf/usbguard/rules.conf;
     };
 
-    xserver.videoDrivers = [ "amdgpu" "nvidia" ];
+    xserver.videoDrivers = [ "amdgpu" ];
 
     /*
     zfs = {
@@ -348,7 +366,6 @@
     */
   };
 
-  virtualisation.virtualbox.host.enable = true;
 
   systemd = {
     watchdog.rebootTime = "15s";
@@ -406,14 +423,6 @@
 
     pam = {
       u2f.enable = true;
-
-      loginLimits = [{
-        domain = "*";
-        type = "soft";
-        item = "nofile";
-        value = "65536";
-      }];
-
       services.swaylock = {};
     };
 
@@ -427,24 +436,27 @@
 
   virtualisation = {
     spiceUSBRedirection.enable = true;
+    virtualbox.host.enable = true;
     #waydroid.enable = true;
 
     libvirtd = {
-      enable = false;
+      enable = true;
+      qemuOvmf = true;
       qemu = {
         swtpm.enable = true;
         ovmf = {
           enable = true;
-          package = (pkgs.OVMF.override {
-            secureBoot = true;
-            tpmSupport = true;
-          });
+          #package = (pkgs.OVMF.override {
+          #  secureBoot = true;
+          #  tpmSupport = true;
+          #});
         };
       };
     };
 
+    # dont think i need this
     docker = {
-      enable = true;
+      enable = false;
       enableNvidia = true;
     };
 
@@ -478,6 +490,7 @@
           "scanner"
           "wheel"
           "vboxusers"
+          "qemu-libvirtd"
         ];
       };
     };

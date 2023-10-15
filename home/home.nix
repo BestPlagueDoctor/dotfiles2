@@ -7,142 +7,90 @@ let
 
   files = "${home}/files";
   common = "${home}/common";
+
+  # TODO: Factor this out along with nixpkgs.hostPlatform
+  nix-misc = inputs.nix-misc.packages.x86_64-linux;
+  editor = lib.getBin (pkgs.writeShellScript "editor" ''
+    exec ${lib.getBin config.services.emacs.package}/bin/emacsclient -ct $@
+  '');
 in
 {
   username = user.login;
   homeDirectory = home;
-  stateVersion = lib.mkForce "21.05";
+  stateVersion = sys.system.stateVersion;
 
   packages =
-    ## Lang Specific ##
-    (with pkgs; [
-      gnuapl
-      shellcheck
+    ## CLI Utils ##
+    (with nix-misc; [
+      git-fuzzy
     ]) ++
 
-    ## CLI Utils ##
     (with pkgs; [
-      bottom
+      btop
+      bubblewrap
       comma
       direnv
+      duf
       dos2unix
-      du-dust
+      fasd
       fd
       ffmpeg
+      file
       gh
-      git-crypt
-      google-cloud-sdk
       htop
       hyperfine
-      joshuto
-      libva-utils
-      ncdu
-      pandoc
-      powertop
-      procs
-      ripgrep
-      sd
-      sops
-      tldr
-      xplr
-
-      btop
-      cloc
-      fasd
-      file
       jq
       killall
       libnotify
+      libva-utils
       lsof
       mediainfo
+      miniserve
+      ncdu
       nix-tree
-      p7zip
+      nurl
+      onefetch
+      pandoc
       patchutils
-      pstree
-      sl
+      powertop
+      procs
+      ripgrep
+      scc
+      sops
       strace
       tcpdump
-      tmux
-      trash-cli
-      unrar
       unzip
-      xplr
       zellij
       zip
-
-      cudatoolkit
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+    ]) ++
 
     ## Networking ##
     (with pkgs; [
-      bluetuith
-      croc
-      curlie
-      dog
-      gping
-      iperf
-      ipfs
-      miraclecast
-      mosh
       remmina
-      scrcpy
-      w3m
-      wayvnc
-      wireshark
-      xh
-
+      sunshine
+      bluetuith
+      iperf
       ldns
       nmap
+      scrcpy
       speedtest-cli
       wget
       whois
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
-
-    ## Privacy and Security ##
-    (with pkgs; [
-      bubblewrap
-      keepassxc
-      ledger-live-desktop
-      monero
-      monero-gui
-      tor-browser-bundle-bin
-      usbguard
-      veracrypt
-      yubikey-manager
-      yubikey-manager-qt
-      yubikey-personalization
-      yubikey-personalization-gui
-      yubioath-flutter
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+      wireshark
+    ]) ++
 
     ## Desktop Environment ##
     (with pkgs; [
       firefox-wayland
       google-chrome
 
-      audacity
       gimp-with-plugins
-      inkscape
       libreoffice-fresh
 
       bemenu
       grim
       imv
       nomacs
-      river
-      session-desktop-appimage
       simple-scan
       slurp
       swappy
@@ -150,74 +98,56 @@ in
       wl-clipboard
       wlr-randr
 
+      xdg-user-dirs
+      xdg-utils
+      xorg.xeyes
+      xorg.xkill
+
       breeze-icons
       gnome.adwaita-icon-theme
       material-design-icons
 
       fira-code
       fira-code-symbols
+      hack-font
       hicolor-icon-theme
       noto-fonts
       noto-fonts-cjk
       noto-fonts-emoji
-      hack-font
+      tamsyn
 
       gtk3
 
-      tamsyn
-      xdg-user-dirs
-      xdg-utils
-      xorg.xeyes
-      xorg.xkill
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+      vial
+    ]) ++
 
     ## Windows ##
     (with pkgs; [
       ntfs3g
-      #wineWowPackages.stable
-
       dosfstools
       efibootmgr
       exfatprogs
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+      virt-manager
+    ]) ++
 
     ## Media ##
     (with pkgs; [
+      easyeffects
       mpc_cli
       pamixer
       pavucontrol
-      streamlink
       vlc
-      yt-dlp
+      playerctl
       spotify
       ncspot
-      playerctl
-      easyeffects
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
-    ])
-    ++
+      prismlauncher
+    ]) ++
 
     ## Communication ##
     (with pkgs; [
       discord-canary
-      element-desktop
-      kotatogram-desktop
-      slack
       zoom-us
-      #weechat
-    ])
-    ++
-    (with pkgs.pkgsMusl; [
+      kotatogram-desktop
     ]);
 
   file = {
@@ -246,30 +176,14 @@ in
       '';
     };
 
-    chell = {
-      target = ".local/bin/chell";
-      executable = true;
-      text = ''
-        #!/bin/sh
-        ${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal -r &
-        ${pkgs.xdg-desktop-portal-gtk}/libexec/xdg-desktop-portal-gtk -r &
-        ${pkgs.xdg-desktop-portal-wlr}/libexec/xdg-desktop-portal-wlr -l INFO -r &
-      '';
-    };
-
-    lock = {
-      target = ".local/bin/lock";
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-        ${pkgs.playerctl}/bin/playerctl -a pause
-        ${sys.security.wrapperDir}/doas ${pkgs.physlock}/bin/physlock
-        #${pkgs.vbetool}/bin/vbetool dpms off
-      '';
+    emacs-ayu-dark = {
+      source = "${root}/conf/emacs/ayu-dark-theme.el";
+      target = ".emacs.d/ayu-dark-theme.el";
     };
   };
 
   sessionPath = [ "${home}/.local/bin" ];
+
 
   sessionVariables = {
     # General
@@ -280,18 +194,16 @@ in
     XKB_DEFAULT_OPTIONS = "caps:escape";
 
     # hyprland
-    LIBVA_DRIVER_NAME="nvidia";
+    #LIBVA_DRIVER_NAME="nvidia";
     XDG_SESSION_TYPE="wayland";
-    GBM_BACKEND="nvidia-drm";
-    __GLX_VENDOR_LIBRARY_NAME="nvidia";
-    WLR_NO_HARDWARE_CURSORS="1";
+    #GBM_BACKEND="nvidia-drm";
+    #__GLX_VENDOR_LIBRARY_NAME="nvidia";
+    #WLR_NO_HARDWARE_CURSORS="1";
 
     # Cleaning up home dir
     CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
     IPFS_PATH = "${config.xdg.dataHome}/ipfs";
-    EDITOR = lib.getBin (pkgs.writeShellScript "editor" ''
-      exec ${lib.getBin config.services.emacs.package}/bin/emacsclient -ct $@
-    '');
+    EDITOR = editor;
   };
 
   shellAliases = {
@@ -299,9 +211,13 @@ in
     diff = "delta";
     g = "git";
     open = "xdg-open";
+    ovpn = "openvpn3";
     rlf = "readlink -f";
+    tf = "terraform";
     zc = "zcalc -r";
     zl = "zellij";
+    bz = "bazel";
+    ms = "miniserve -HWqrgzl --readme --index index.html";
 
     noti = "noti ";
     doas = "doas ";
