@@ -105,3 +105,7 @@ window#waybar {
 
 #tray {
 }
+
+#custom-spotify {
+    color: rgb(102, 220, 105);
+}

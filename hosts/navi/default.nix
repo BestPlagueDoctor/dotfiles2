@@ -35,12 +35,12 @@
 
   fileSystems = {
     "/" = {
-      device = "/dev/disk/by-uuid/e2ebde39-323d-4813-bc4c-63c344e7c08e";
+      device = "/dev/disk/by-uuid/5143dfbe-22da-4c8d-92b6-1ea237d9008b";
       fsType = "ext4";
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/B690-60AC";
+      device = "/dev/disk/by-uuid/5742-D201";
       fsType = "vfat";
     };
   };
@@ -56,14 +56,14 @@
     interfaces.enp0s25.useDHCP = true;
     wireless.iwd.enable = true;
     networkmanager.enable = false;
-    firewall.allowedTCPPorts = [8009 8010];
+    firewall.allowedTCPPorts = [8080 8009 8010];
   };
 
   i18n.defaultLocale = "en_US.UTF-8";
 
   console = {
     keyMap = "us";
-    font = "Tamsyn6x12r";
+    font = "Tamsyn7x13r";
     packages = [ pkgs.tamsyn ];
     earlySetup = true;
   };
@@ -239,5 +239,6 @@
     ];
   };
 
+  zramSwap.enable = true;
   system.stateVersion = lib.mkForce "21.11";
 }

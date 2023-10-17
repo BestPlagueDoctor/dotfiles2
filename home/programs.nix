@@ -455,6 +455,7 @@
 
         modules-left = [
           "hyprland/workspaces"
+          "custom/spotify"
         ];
 
         modules-center = [ "hyprland/window" ];
@@ -484,15 +485,15 @@
 
         "clock" = { "format-alt" = "{:%Y-%m-%d}"; "on-click" = ""; };
         "cpu" = {
-          "format" = "{usage}% 󰍛";
+          "format" = "{usage}% 󰍛 | ";
         };
 
-        "memory" = { "format"= "{}% "; };
+        "memory" = { "format"= "{}% 󰧑 | "; };
 
         "temperature" = {
           "critical-threshold" = 80;
-          "format" = "{}℃  󰏈";
-          "format-critical" = "{}℃ 󰇺";
+          "format" = "{}℃  󰏈 | ";
+          "format-critical" = "{}℃ 󰇺 | ";
           "interval" = 5;
         };
 
@@ -503,31 +504,31 @@
                 "warning"= 30;
                 "critical"= 15;
             };
-            "format"= "{capacity}% {icon}";
+            "format"= "{capacity}% {icon} | ";
             # "format-good"= ""; # An empty format will hide the module
             # "format-full"= "";
-            "format-icons"= ["" "" "" "" ""];
+            "format-charging"= "{capacity}% 󰂄 | ";
+            "format-plugged"= "{capacity}% 󰂄 | ";
+            "format-icons"= ["󰁺" "󰁼" "󰁾" "󰂀" "󰁹"];
         };
 
         "network" = {
-            "format-wifi"= "{essid} ({signalStrength}%) ";
-            "format-ethernet"= "{ifname}= {ipaddr}/{cidr} ";
-            "format-disconnected"= "Disconnected ⚠";
+            "format-wifi"= "{essid} ({signalStrength}%) 󰖩 | ";
+            "format-ethernet"= "{ifname}= {ipaddr}/{cidr} 󰈀 | ";
+            "format-disconnected"= "Disconnected ⚠ | ";
         };
 
         "pulseaudio" = {
-            #"scroll-step"= 1;
-            "format"= "{volume}% {icon}";
-            "format-bluetooth"= "{volume}% {icon}";
-            "format-muted"= "";
+            "scroll-step"= 1;
+            "format"= "{volume}% {icon} | ";
+            "format-bluetooth"= "{volume}%{icon}󰂯 | ";
+            "format-muted"= "󰖁 | ";
             "format-icons"= {
-                "headphones" = "";
-                "handsfree" = "";
-                "headset" = "";
-                "phone" = "";
-                "portable" = "";
-                "car" = "";
-                "default" = [ "" "" ];
+                "headphones" = "󰋋";
+                "headset" = "󰋎";
+                "phone" = "󰏲";
+                "car" = "󰄋";
+                "default" = [ "󰖀" "󰕾" ];
             };
             "on-click"= "pavucontrol";
         };
@@ -535,6 +536,9 @@
         "hyprland/window" = {
           "format" = {};
           "seperate-outputs" = true;
+          "rewrite" = {
+            "((\\S*\\s){0,3})(.*) — Mozilla Firefox"= "ff - $1";
+          };
         };
       };
     };
@@ -560,7 +564,7 @@
     enableCompletion = true;
     enableVteIntegration = true;
     syntaxHighlighting.enable = true;
-    historySubstringSearch.enable = true;
+    historySubstringSearch.enable = false;
 
     autocd = true;
     defaultKeymap = "viins";
