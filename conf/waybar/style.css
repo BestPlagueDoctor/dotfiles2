@@ -47,7 +47,6 @@ window#waybar {
     font-weight: bold;
 }
 
-
 #battery {
 }
 
@@ -56,18 +55,48 @@ window#waybar {
 }
 
 #battery.charging {
+    background: #2E3440;
+    color: white;
+    animation-name: blink-green;
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
 }
 
-@keyframes blink {
+@keyframes blink-orange {
     to {
         background-color: #2E3440;
         color: orange;
     }
 }
 
+@keyframes blink-green {
+    to {
+        background-color: #2E3440;
+        color: green;
+    }
+}
+
+@keyframes blink-red {
+    to {
+        background-color: #2E3440;
+        color: red;
+    }
+}
+
 #battery.warning:not(.charging) {
     color: white;
-    animation-name: blink;
+    animation-name: blink-red;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#battery.critical:not(.charging) {
+    color: white;
+    animation-name: blink-red;
     animation-duration: 0.5s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
@@ -77,7 +106,7 @@ window#waybar {
 #temperature.critical {
     background: #2E3440;
     color: white;
-    animation-name: blink;
+    animation-name: blink-orange;
     animation-duration: 0.5s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;

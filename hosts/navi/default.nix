@@ -16,7 +16,7 @@
     package = pkgs.nixUnstable;
     extraOptions = ''
       experimental-features = nix-command flakes ca-derivations
-    '';
+      '';
   };
 
   boot = {
@@ -76,7 +76,7 @@
       enable = true;
       extraRules = [{
         groups = [ "wheel" ];
-	      keepEnv = true;
+        keepEnv = true;
       }];
     };
   };
@@ -90,13 +90,14 @@
     pcscd.enable = true;
     tlp.enable = true;
     upower.enable = true;
+    logind.lidSwitch = "ignore";
 
     printing = {
       enable = true;
       drivers = with pkgs; [
         cnijfilter2
-        gutenprint
-        gutenprintBin
+          gutenprint
+          gutenprintBin
       ];
     };
 
@@ -116,21 +117,52 @@
     udev.packages = with pkgs; [
       ledger-udev-rules
       yubikey-personalization
+      (pkgs.writeTextFile {
+       name = "52-xilinx-digilent-usb.rules";
+       text = ''
+       ATTR{idVendor}=="1443", MODE:="666"
+       ACTION=="add", ATTR{idVendor}=="0403", ATTR{manufacturer}=="Digilent", MODE:="666"
+       '';
+
+       destination = "/etc/udev/rules.d/52-xilinx-digilent-usb.rules";
+       })
+      (pkgs.writeTextFile {
+       name = "52-xilinx-ftdi-usb.rules";
+       text = ''
+       ACTION=="add", ATTR{idVendor}=="0403", ATTR{manufacturer}=="Xilinx", MODE:="666"
+       '';
+
+       destination = "/etc/udev/rules.d/52-xilinx-ftdi-usb.rules";
+       })
+      (pkgs.writeTextFile {
+       name = "52-xilinx-pcusb.rules";
+       text = ''
+       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0008", MODE="666"
+       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0007", MODE="666"
+       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0009", MODE="666"
+       ATTR{idVendor}=="03fd", ATTR{idProduct}=="000d", MODE="666"
+       ATTR{idVendor}=="03fd", ATTR{idProduct}=="000f", MODE="666"
+       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0013", MODE="666"
+       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0015", MODE="666"
+       '';
+
+       destination = "/etc/udev/rules.d/52-xilinx-pcusb.rules";
+       })
     ];
 
     actkbd = {
       enable = true;
       bindings = [
-        {
-          keys = [ 224 ];
-          events = [ "key" ];
-          command = "${pkgs.light}/bin/light -U 10";
-        }
-        {
-          keys = [ 225 ];
-          events = [ "key" ];
-          command = "${pkgs.light}/bin/light -A 10";
-        }
+      {
+        keys = [ 224 ];
+        events = [ "key" ];
+        command = "${pkgs.light}/bin/light -U 10";
+      }
+      {
+        keys = [ 225 ];
+        events = [ "key" ];
+        command = "${pkgs.light}/bin/light -A 10";
+      }
       ];
     };
   };
@@ -146,9 +178,9 @@
       driSupport32Bit = true;
       extraPackages = with pkgs; [
         intel-media-driver
-        libvdpau-va-gl
-        vaapiIntel
-        vaapiVdpau
+          libvdpau-va-gl
+          vaapiIntel
+          vaapiVdpau
       ];
     };
 
@@ -178,15 +210,15 @@
     defaultPackages = lib.mkForce [ ];
     systemPackages = with pkgs; [
       comma
-      hdparm
-      lm_sensors
-      lshw
-      pciutils
-      usbutils
-      pcsctools
-      git
-      rsync
-      libGL
+        hdparm
+        lm_sensors
+        lshw
+        pciutils
+        usbutils
+        pcsctools
+        git
+        rsync
+        libGL
     ];
 
     variables.EDITOR = "nvim";
@@ -199,7 +231,7 @@
     light.enable = true;
     nix-ld.enable = true;
     hyprland.enable = true;
-    #steam.enable = true;
+#steam.enable = true;
     zsh.enable = true;
 
     neovim = {
@@ -223,8 +255,8 @@
           set tabstop=2 shiftwidth=2 expandtab
           set tagrelative
           set tags^=./.git/tags;
-          set mouse=a
-        '';
+        set mouse=a
+          '';
       };
     };
   };

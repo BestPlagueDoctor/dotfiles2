@@ -188,7 +188,7 @@
   };
 
   starship = {
-    enable = true;
+    enable = false;
     #enableZshIntegration = false;
 
     settings = {
@@ -462,14 +462,22 @@
 
         modules-right = [
           "pulseaudio"
+          "custom/separator"
           "network"
+          "custom/separator"
           "temperature"
+          "custom/separator"
           "cpu"
+          "custom/separator"
           "memory"
+          "custom/separator"
           "battery"
+          "custom/separator"
           "tray"
           "clock"
         ];
+
+        "custom/separator" = { format = " | "; interval = "once"; tooltip = false; };
 
         "wlr/workspaces" = {
           disable-scroll = true;
@@ -485,15 +493,15 @@
 
         "clock" = { "format-alt" = "{:%Y-%m-%d}"; "on-click" = ""; };
         "cpu" = {
-          "format" = "{usage}% 󰍛 | ";
+          "format" = "{usage}% 󰍛";
         };
 
-        "memory" = { "format"= "{}% 󰧑 | "; };
+        "memory" = { "format"= "{}% 󰧑"; };
 
         "temperature" = {
           "critical-threshold" = 80;
-          "format" = "{}℃  󰏈 | ";
-          "format-critical" = "{}℃ 󰇺 | ";
+          "format" = "{}℃  󰏈";
+          "format-critical" = "{}℃ 󰇺";
           "interval" = 5;
         };
 
@@ -504,25 +512,25 @@
                 "warning"= 30;
                 "critical"= 15;
             };
-            "format"= "{capacity}% {icon} | ";
+            "format"= "{capacity}% {icon}";
             # "format-good"= ""; # An empty format will hide the module
             # "format-full"= "";
-            "format-charging"= "{capacity}% 󰂄 | ";
-            "format-plugged"= "{capacity}% 󰂄 | ";
+            "format-charging"= "{capacity}% 󰂄";
+            "format-plugged"= "{capacity}% 󰚥";
             "format-icons"= ["󰁺" "󰁼" "󰁾" "󰂀" "󰁹"];
         };
 
         "network" = {
-            "format-wifi"= "{essid} ({signalStrength}%) 󰖩 | ";
-            "format-ethernet"= "{ifname}= {ipaddr}/{cidr} 󰈀 | ";
-            "format-disconnected"= "Disconnected ⚠ | ";
+            "format-wifi"= "{essid} ({signalStrength}%) 󰖩";
+            "format-ethernet"= "{ifname}= {ipaddr}/{cidr} 󰈀";
+            "format-disconnected"= "Disconnected ⚠";
         };
 
         "pulseaudio" = {
             "scroll-step"= 1;
-            "format"= "{volume}% {icon} | ";
-            "format-bluetooth"= "{volume}%{icon}󰂯 | ";
-            "format-muted"= "󰖁 | ";
+            "format"= "{volume}% {icon}";
+            "format-bluetooth"= "{volume}%{icon}󰂯";
+            "format-muted"= "󰖁";
             "format-icons"= {
                 "headphones" = "󰋋";
                 "headset" = "󰋎";
@@ -538,6 +546,7 @@
           "seperate-outputs" = true;
           "rewrite" = {
             "((\\S*\\s){0,3})(.*) — Mozilla Firefox"= "ff - $1";
+            "((\\S*\\s){0,3})(.*)"= "$1 ";
           };
         };
       };

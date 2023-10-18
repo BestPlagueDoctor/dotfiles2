@@ -119,6 +119,7 @@ in
       gtk3
 
       vial
+      dolphin
     ]) ++
 
     ## Windows ##
@@ -188,6 +189,7 @@ in
   sessionVariables = {
     # General
     MANPAGER = "sh -c 'col -bx | bat -l man -p'";
+    _JAVA_AWT_WM_NONREPARENTING="1";
 
     # Wayland
     MOZ_ENABLE_WAYLAND = "1";
