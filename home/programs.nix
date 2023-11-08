@@ -549,6 +549,18 @@
             "((\\S*\\s){0,3})(.*)"= "$1 ";
           };
         };
+        "custom/spotify"= {
+            "format"= "󰓇 {}";
+            "max-length"= 40;
+            "interval"= 10; # Remove this if your script is endless and write in loop
+            "exec"= "$HOME/.config/waybar/mediaplayer.sh 2> /dev/null"; # Script in resources folder
+            "exec-if"= "pgrep spotify || pgrep ncspot";
+        };
+        "custom/weather" = {
+          "format" = "{}";
+          "exec" = "curl -s wttr.in/\?format=\"Urbana:+%C,+%t+%w\"";
+          "interval" = 1800;
+        };
       };
     };
   };

@@ -149,6 +149,11 @@ in
       discord-canary
       zoom-us
       kotatogram-desktop
+    ]) ++
+
+    ## Misc ##
+    (with pkgs; [
+      asciiquarium
     ]);
 
   file = {
@@ -193,7 +198,7 @@ in
 
     # Wayland
     MOZ_ENABLE_WAYLAND = "1";
-    XKB_DEFAULT_OPTIONS = "caps:escape";
+    #XKB_DEFAULT_OPTIONS = "caps:escape";
 
     # hyprland
     #LIBVA_DRIVER_NAME="nvidia";
@@ -213,12 +218,9 @@ in
     diff = "delta";
     g = "git";
     open = "xdg-open";
-    ovpn = "openvpn3";
     rlf = "readlink -f";
-    tf = "terraform";
     zc = "zcalc -r";
     zl = "zellij";
-    bz = "bazel";
     ms = "miniserve -HWqrgzl --readme --index index.html";
 
     noti = "noti ";
@@ -236,5 +238,6 @@ in
     rscp = "rsync -ahvP";
 
     hl = "exec Hyprland";
+    please = "sudo !!";
   };
 }
