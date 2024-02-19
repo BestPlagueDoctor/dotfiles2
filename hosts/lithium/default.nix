@@ -271,7 +271,7 @@
 
     avahi = {
       enable = true;
-      nssmdns = true;
+      nssmdns4 = true;
     };
 
     monero = {
@@ -466,12 +466,11 @@
 
   virtualisation = {
     spiceUSBRedirection.enable = true;
-    virtualbox.host.enable = true;
+    virtualbox.host.enable = false;
     #waydroid.enable = true;
 
     libvirtd = {
       enable = true;
-      qemuOvmf = true;
       qemu = {
         swtpm.enable = true;
         ovmf = {
@@ -570,14 +569,8 @@
     nix-ld.enable = true;
     zsh.enable = true;
 
-    custom.ddcutil = {
-      enable = true;
-      users = [ user.login ];
-    };
-
     hyprland = {
       enable = true;
-      package = inputs.hyprland.packages.${pkgs.system}.default.override { enableNvidiaPatches = true; };
     };
 
     neovim = {

@@ -157,13 +157,13 @@ in
     ]);
 
   file = {
-    desktop.source = symlink "${files}/desktop";
-    dl.source = symlink "${files}/dl";
-    docs.source = symlink "${files}/docs";
-    media.source = symlink "${files}/media";
-    music.source = symlink "${files}/music";
-    ss.source = symlink "${files}/ss";
-    templates.source = symlink "${files}/templates";
+    #desktop.source = symlink "${files}/desktop";
+    #dl.source = symlink "${files}/dl";
+    #docs.source = symlink "${files}/docs";
+    #media.source = symlink "${files}/media";
+    #music.source = symlink "${files}/music";
+    #ss.source = symlink "${files}/ss";
+    #templates.source = symlink "${files}/templates";
 
     dnsCheck = {
       source = "${root}/conf/bin/dnscheck.sh";
@@ -238,6 +238,7 @@ in
     rscp = "rsync -ahvP";
 
     hl = "exec Hyprland";
+    btctl = "bluetoothctl";
     please = "sudo !!";
   };
 }
