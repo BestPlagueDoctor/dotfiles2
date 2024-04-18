@@ -1,2 +1,2 @@
 #!/bin/sh
-nixos-rebuild --flake . switch "$@" --install-bootloader
+doas nixos-rebuild --flake .#lithium switch "$@" 
