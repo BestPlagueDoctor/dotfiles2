@@ -9,7 +9,7 @@
         "DP-2,1024x768@85,0x0,1"
         "HDMI-A-1,1920x1080@144,1024x0,1"
         "DP-1,1920x1200,2944x-100,1"
-        ",preferred,auto,1"
+        ",preferred,auto,1.175"
       ];
 
       workspace = "HDMI-A-1,1";

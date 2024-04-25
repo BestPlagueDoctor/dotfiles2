@@ -72,7 +72,7 @@
     settings = {
       main = {
         term = "xterm-256color";
-        font = "Tamsyn:size=10";
+        font = "Fira Code:size=12";
         dpi-aware = "no";
       };
 
@@ -506,7 +506,7 @@
         };
 
         "battery" = {
-            "bat"= "BAT0";
+            "bat"= "BAT1";
             "states"= {
                 # "good"= 95;
                 "warning"= 30;

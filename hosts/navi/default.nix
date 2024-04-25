@@ -20,12 +20,12 @@
   };
 
   boot = {
-    extraModulePackages = with config.boot.kernelPackages; [ tp_smapi ];
-    initrd.availableKernelModules = [ "ehci_pci" "ahci" "usb_storage" "sd_mod" "sdhci_pci" ];
+    #extraModulePackages = with config.boot.kernelPackages; [ tp_smapi ];
+    initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
 
-    kernelModules = [ "kvm-intel" "tp_smapi" ];
+    kernelModules = [ "kvm-amd" ];
 
-    kernelParams = [ "i915.enable_rc6=7" ];
+    #kernelParams = [ "i915.enable_rc6=7" ];
 
     loader = {
       systemd-boot.enable = true;
@@ -33,17 +33,15 @@
     };
   };
 
-  fileSystems = {
-    "/" = {
-      device = "/dev/disk/by-uuid/5143dfbe-22da-4c8d-92b6-1ea237d9008b";
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/f1b173e9-b05e-409b-a6eb-80494280e6f7";
       fsType = "ext4";
     };
 
-    "/boot" = {
-      device = "/dev/disk/by-uuid/5742-D201";
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/C723-1F49";
       fsType = "vfat";
     };
-  };
 
   time.timeZone = "America/Chicago";
 
@@ -53,7 +51,7 @@
 
   networking = {
     hostName = "navi";
-    interfaces.enp0s25.useDHCP = true;
+    useDHCP = true;
     wireless.iwd.enable = true;
     networkmanager.enable = false;
     firewall.allowedTCPPorts = [8080 8009 8010];
@@ -90,7 +88,7 @@
     pcscd.enable = true;
     tlp.enable = true;
     upower.enable = true;
-    logind.lidSwitch = "ignore";
+    #logind.lidSwitch = "lock";
 
     printing = {
       enable = true;
@@ -167,7 +165,7 @@
     };
   };
 
-  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enable = false;
 
   hardware = {
     bluetooth.enable = true;
