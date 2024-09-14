@@ -124,6 +124,28 @@
           };
         };
       };
+
+      nodes = {
+        navi = {
+          hostname = "navi";
+          profiles.system = {
+            user = "root";
+            sudo = "doas -u";
+            path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.navi;
+          };
+        };
+      };
+
+      nodes = {
+        magi = {
+          hostname = "magi";
+          profiles.system = {
+            user = "root";
+            sudo = "doas -u";
+            path = inputs.deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.magi;
+          };
+        };
+      };
     };
 
     devShells = forAllSystems (system: pkgs: with pkgs; {
