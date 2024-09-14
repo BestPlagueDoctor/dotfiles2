@@ -5,20 +5,6 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  nix = {
-    settings = {
-      trusted-users = [ "@wheel" ];
-      allowed-users = [ "@wheel" ];
-      builders-use-substitutes = false;
-      require-sigs = false;
-    };
-
-    package = pkgs.nixUnstable;
-    extraOptions = ''
-      experimental-features = nix-command flakes ca-derivations
-      '';
-  };
-
   boot = {
     #extraModulePackages = with config.boot.kernelPackages; [ tp_smapi ];
     initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
@@ -44,6 +30,30 @@
     };
 
   time.timeZone = "America/Chicago";
+
+  nix = {
+    package = pkgs.nixVersions.latest;
+    channel.enable = true;
+    nixPath = lib.mkForce [ "nixpkgs=${config.nix.registry.nixpkgs.flake}" ];
+
+    registry = {
+      nixpkgs.flake = inputs.nixpkgs;
+    };
+
+    settings = {
+      allowed-users = lib.mkForce [ "@users" "@wheel" ];
+      trusted-users = lib.mkForce [ "@wheel" ];
+      experimental-features = [
+        "auto-allocate-uids"
+        "ca-derivations"
+        "flakes"
+        "nix-command"
+        "recursive-nix"
+      ];
+
+      warn-dirty = false;
+    };
+  };
 
   nixpkgs = {
     hostPlatform = "x86_64-linux";
@@ -229,7 +239,7 @@
     light.enable = true;
     nix-ld.enable = true;
     hyprland.enable = true;
-#steam.enable = true;
+    steam.enable = true;
     zsh.enable = true;
 
     neovim = {
