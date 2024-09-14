@@ -77,6 +77,7 @@
     defaultPackages = lib.mkForce [ ];
     systemPackages = with pkgs; [
       bottom
+      doas-sudo-shim
       fd
       git
       hdparm
@@ -167,6 +168,7 @@
       extraRules = [{
         groups = [ "wheel" ];
         keepEnv = true;
+        noPass = false;
       }];
     };
   };
