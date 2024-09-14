@@ -6,4 +6,4 @@ else
     cmd=nix
 fi
 
-$cmd build ".#nixosConfigurations.$(hostname).config.system.build.toplevel" --keep-going --extra-experimental-features nix-command --extra-experimental-features flakes "$@"
+$cmd build ".#nixosConfigurations.$(hostname).config.system.build.toplevel" --keep-going "$@"
