@@ -1,32 +1,69 @@
-{ config, pkgs, lib, sys, root, user, ... }:
+{ config, pkgs, lib, root, user, ... }:
 
 {
-  mpd-mpris.enable = true;
-  mpris-proxy.enable = true;
-  playerctld.enable = true;
+  services = {  
+    mpd-mpris.enable = true;
+    mpris-proxy.enable = true;
+    playerctld.enable = true;
 
-  emacs = {
-    enable = true;
-    # TODO: Fix upstream.
-    defaultEditor = false;
-
-    client = {
+    emacs = {
       enable = true;
-      arguments = [ "-n" "-t" "-c" ];
+      # TODO: Fix upstream.
+      defaultEditor = false;
+
+      client = {
+        enable = true;
+        arguments = [ "-n" "-t" "-c" ];
+      };
     };
-  };
 
-  mako = {
-    enable = true;
-    extraConfig = ''
-      [mode=do-not-disturb]
-      invisible=1
+    hypridle = {
+      enable = true;
+      settings = {
+        general = {
+          after_sleep_cmd = "hyprctl dispatch dpms on";
+          ignore_dbus_inhibit = false;
+          lock_cmd = "pgrep hyprlock || hyprlock";
+        };
+
+        listener = [
+          {
+            timeout = 900;
+            on-timeout = "hyprlock";
+          }
+          {
+            timeout = 1200;
+            on-timeout = "hyprctl dispatch dpms off";
+            on-resume = "hyprctl dispatch dpms on";
+          }
+        ];
+      };
+    };
+
+    mako = {
+      enable = true;
+      extraConfig = ''
+        [mode=do-not-disturb]
+        invisible=1
+      '';
+    };
+
+    mpd = {
+      enable = true;
+      network.startWhenNeeded = true;
+      extraConfig = ''
+      audio_output {
+        type "pipewire"
+        name "Pipewire Playback"
+      }
     '';
-  };
+    };
 
-  mpd = {
-    enable = true;
-    network.startWhenNeeded = true;
+    wlsunset = {
+        enable = true;
+        latitude = 33.7;
+        longitude = -84.3;
+    };
   };
 }
 

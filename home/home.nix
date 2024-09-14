@@ -1,244 +1,222 @@
-{ config, sys, pkgs, lib, root, user, inputs, ... }:
+{ config
+, osConfig
+, pkgs
+, system
+, lib
+, root
+, user
+, inputs
+, stateVersion
+, ...
+}:
 
 let
-  symlink = config.lib.file.mkOutOfStoreSymlink;
+  inherit (osConfig.nixpkgs) hostPlatform;
 
-  home = "/home/${user.login}";
+  homeDir = "/home/${user.login}";
 
-  files = "${home}/files";
-  common = "${home}/common";
-
-  # TODO: Factor this out along with nixpkgs.hostPlatform
   nix-misc = inputs.nix-misc.packages.x86_64-linux;
+  ragenix = inputs.ragenix.packages.x86_64-linux.default;
+
   editor = lib.getBin (pkgs.writeShellScript "editor" ''
     exec ${lib.getBin config.services.emacs.package}/bin/emacsclient -ct $@
   '');
 in
 {
-  username = user.login;
-  homeDirectory = home;
-  stateVersion = sys.system.stateVersion;
+  home = {
+    inherit stateVersion;
 
-  packages =
-    ## CLI Utils ##
-    (with nix-misc; [
-      git-fuzzy
-    ]) ++
+    # XXX: https://github.com/nix-community/home-manager/issues/4826
+    activation.batCache = lib.mkForce (lib.hm.dag.entryAfter [ "linkGeneration" ] '''');
 
-    (with pkgs; [
+    username = user.login;
+    packages = with pkgs; [
+      asciiquarium
+      adwaita-icon-theme
+      bemenu
+      bluetuith
+      breeze-icons
       btop
       bubblewrap
       comma
       direnv
-      duf
+      discord-canary
+      dolphin
       dos2unix
+      dosfstools
+      duf
+      easyeffects
+      efibootmgr
+      exfatprogs
       fasd
       fd
       ffmpeg
       file
+      fira-code
+      fira-code-symbols
+      firefox-wayland
       gh
+      gimp-with-plugins
+      google-chrome
+      grim
+      gtk3
+      hack-font
+      hicolor-icon-theme
       htop
       hyperfine
+      imv
+      iperf
       jq
       killall
+      kotatogram-desktop
+      ldns
       libnotify
+      libreoffice-fresh
       libva-utils
       lsof
+      material-design-icons
       mediainfo
       miniserve
+      mpc_cli
       ncdu
+      ncspot
+      nix-inspect
+      nix-output-monitor
       nix-tree
+      nmap
+      nomacs
+      noto-fonts
+      noto-fonts-cjk
+      noto-fonts-emoji
+      ntfs3g
       nurl
       onefetch
+      pamixer
       pandoc
       patchutils
+      pavucontrol
+      playerctl
       powertop
+      prismlauncher
       procs
+      remmina
       ripgrep
+      rage
+      ragenix
+      rclone
       scc
+      scrcpy
+      simple-scan
+      slurp
       sops
+      speedtest-cli
+      spotify
       strace
+      sunshine
+      swappy
+      swaylock
+      tamsyn
       tcpdump
       unzip
-      zellij
-      zip
-    ]) ++
-
-    ## Networking ##
-    (with pkgs; [
-      remmina
-      sunshine
-      bluetuith
-      iperf
-      ldns
-      nmap
-      scrcpy
-      speedtest-cli
+      vial
+      virt-manager
+      vlc
       wget
       whois
       wireshark
-    ]) ++
-
-    ## Desktop Environment ##
-    (with pkgs; [
-      firefox-wayland
-      google-chrome
-
-      gimp-with-plugins
-      libreoffice-fresh
-
-      bemenu
-      grim
-      imv
-      nomacs
-      simple-scan
-      slurp
-      swappy
-      swaylock
       wl-clipboard
       wlr-randr
-
       xdg-user-dirs
       xdg-utils
       xorg.xeyes
       xorg.xkill
-
-      breeze-icons
-      gnome.adwaita-icon-theme
-      material-design-icons
-
-      fira-code
-      fira-code-symbols
-      hack-font
-      hicolor-icon-theme
-      noto-fonts
-      noto-fonts-cjk
-      noto-fonts-emoji
-      tamsyn
-
-      gtk3
-
-      vial
-      dolphin
-    ]) ++
-
-    ## Windows ##
-    (with pkgs; [
-      ntfs3g
-      dosfstools
-      efibootmgr
-      exfatprogs
-      virt-manager
-    ]) ++
-
-    ## Media ##
-    (with pkgs; [
-      easyeffects
-      mpc_cli
-      pamixer
-      pavucontrol
-      vlc
-      playerctl
-      spotify
-      ncspot
-      prismlauncher
-    ]) ++
-
-    ## Communication ##
-    (with pkgs; [
-      discord-canary
+      zellij
+      zip
       zoom-us
-      kotatogram-desktop
-    ]) ++
+    ];
 
-    ## Misc ##
-    (with pkgs; [
-      asciiquarium
-    ]);
+    file = {
+      dnsCheck = {
+        source = "${root}/conf/bin/dnscheck.sh";
+        target = ".local/bin/dnscheck";
+        executable = true;
+      };
 
-  file = {
-    #desktop.source = symlink "${files}/desktop";
-    #dl.source = symlink "${files}/dl";
-    #docs.source = symlink "${files}/docs";
-    #media.source = symlink "${files}/media";
-    #music.source = symlink "${files}/music";
-    #ss.source = symlink "${files}/ss";
-    #templates.source = symlink "${files}/templates";
+      lesskey = {
+        target = ".lesskey";
+        text = ''
+          #env
 
-    dnsCheck = {
-      source = "${root}/conf/bin/dnscheck.sh";
-      target = ".local/bin/dnscheck";
-      executable = true;
+          #command
+          / forw-search ^W
+        '';
+      };
+
+      emacs-ayu-dark = {
+        source = "${root}/conf/emacs/ayu-dark-theme.el";
+        target = ".emacs.d/ayu-dark-theme.el";
+      };
     };
 
-    lesskey = {
-      target = ".lesskey";
-      text = ''
-        #env
-        LESSHISTFILE=${config.xdg.cacheHome}/less/history
+    sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
-        #command
-        / forw-search ^W
-      '';
+    # lots of comments in here vro.
+    sessionVariables = {
+      # General
+      MANPAGER = "sh -c 'col -bx | bat -l man -p'";
+      _JAVA_AWT_WM_NONREPARENTING="1";
+
+      # Wayland
+      MOZ_ENABLE_WAYLAND = "1";
+      #XKB_DEFAULT_OPTIONS = "caps:escape";
+
+      # hyprland
+      #LIBVA_DRIVER_NAME="nvidia";
+      XDG_SESSION_TYPE="wayland";
+      #GBM_BACKEND="nvidia-drm";
+      #__GLX_VENDOR_LIBRARY_NAME="nvidia";
+      #WLR_NO_HARDWARE_CURSORS="1";
+
+      # Cleaning up home dir
+      #CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
+      #IPFS_PATH = "${config.xdg.dataHome}/ipfs";
+      EDITOR = editor;
     };
 
-    emacs-ayu-dark = {
-      source = "${root}/conf/emacs/ayu-dark-theme.el";
-      target = ".emacs.d/ayu-dark-theme.el";
+    shellAliases = {
+      cat = "bat";
+      diff = "delta";
+      g = "git";
+      open = "xdg-open";
+      rlf = "readlink -f";
+      zc = "zcalc -r";
+      zl = "zellij";
+      ms = "miniserve -HWqrgzl --readme --index index.html";
+
+      noti = "noti ";
+      doas = "doas ";
+      sudo = "doas ";
+
+      sc = "systemctl";
+      jc = "journalctl";
+      uc = "systemctl --user";
+      udc = "udisksctl";
+
+      vi = "$EDITOR -t";
+      vim = "$EDITOR -t";
+
+      rscp = "rsync -ahvP";
+
+      hl = "exec Hyprland";
+      btctl = "bluetoothctl";
+      please = "sudo !!";
     };
-  };
-
-  sessionPath = [ "${home}/.local/bin" ];
-
-
-  sessionVariables = {
-    # General
-    MANPAGER = "sh -c 'col -bx | bat -l man -p'";
-    _JAVA_AWT_WM_NONREPARENTING="1";
-
-    # Wayland
-    MOZ_ENABLE_WAYLAND = "1";
-    #XKB_DEFAULT_OPTIONS = "caps:escape";
-
-    # hyprland
-    #LIBVA_DRIVER_NAME="nvidia";
-    XDG_SESSION_TYPE="wayland";
-    #GBM_BACKEND="nvidia-drm";
-    #__GLX_VENDOR_LIBRARY_NAME="nvidia";
-    #WLR_NO_HARDWARE_CURSORS="1";
-
-    # Cleaning up home dir
-    CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
-    IPFS_PATH = "${config.xdg.dataHome}/ipfs";
-    EDITOR = editor;
-  };
-
-  shellAliases = {
-    cat = "bat";
-    diff = "delta";
-    g = "git";
-    open = "xdg-open";
-    rlf = "readlink -f";
-    zc = "zcalc -r";
-    zl = "zellij";
-    ms = "miniserve -HWqrgzl --readme --index index.html";
-
-    noti = "noti ";
-    doas = "doas ";
-    sudo = "doas ";
-
-    sc = "systemctl";
-    jc = "journalctl";
-    uc = "systemctl --user";
-    udc = "udisksctl";
-
-    vi = "$EDITOR -t";
-    vim = "$EDITOR -t";
-
-    rscp = "rsync -ahvP";
-
-    hl = "exec Hyprland";
-    btctl = "bluetoothctl";
-    please = "sudo !!";
+  } // lib.optionalAttrs (hostPlatform.isLinux) {
+    pointerCursor = {
+      gtk.enable = true;
+      package = pkgs.adwaita-icon-theme;
+      name = "Adwaita";
+      size = 16;
+    };
   };
 }

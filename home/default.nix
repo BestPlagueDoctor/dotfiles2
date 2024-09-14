@@ -1,23 +1,18 @@
-{ config, pkgs, lib, root, user, inputs, ... }:
+{ lib, osConfig, ... }:
 
 let
-  args = {
-    inherit pkgs lib root user inputs;
-    sys = config;
-    config = config.home-manager.users."${user.login}";
-  };
-in
-{
-  home-manager.users."${user.login}" = {
-    _module.args = { sys = config; };
-    home = import ./home.nix args;
-    programs = import ./programs.nix args;
-    services = import ./services.nix args;
-    systemd = import ./systemd.nix args;
-    xdg = import ./xdg.nix args;
-    gtk = import ./gtk.nix args;
-    wayland = import ./wayland.nix args;
+  inherit (osConfig.nixpkgs) hostPlatform;
+in {
+  imports = [
+    ./home.nix
+    ./programs.nix
+    ./xdg.nix
+  ] ++ lib.optionals (hostPlatform.isLinux) [
+    ./services.nix
+    ./systemd.nix
+    ./wayland.nix
+    ./gtk.nix
+  ];
 
-    fonts.fontconfig.enable = lib.mkForce true;
-  };
-} 
+  fonts.fontconfig.enable = lib.mkForce true;
+}

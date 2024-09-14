@@ -72,7 +72,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
     graphics = {
       enable = true;
-      enable32bit = true;
+      enable32Bit = true;
       extraPackages = with pkgs; [
         amdvlk
         rocm-opencl-icd
@@ -228,7 +228,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     apparmor.enable = true;
     auditd.enable = true;
     rtkit.enable = true;
-    plkit.enable = true;
+    polkit.enable = true;
     sudo.enable = false;
 
     acme = {
@@ -325,7 +325,10 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
   home-manager = {
     users."${user.login}" = import "${root}/home";
-    extraSpecialArgs = { inherit inputs root user; };
+    extraSpecialArgs = { 
+      inherit inputs root user; 
+      stateVersion = "24.11";
+    };
   };
 
   environment = {
@@ -396,24 +399,12 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     gcc.oc-kmod.enable = true;
     gcc.rules.enable = true;
   };
-
-/*
-  sops = {
-    defaultSopsFile = "${root}/secrets/secrets.yaml";
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-
-    secrets = {
-      "${user.login}-pw".neededForUsers = true;
-    };
-  };
-*/
-
   zramSwap.enable = true;
 
   system = {
-    stateVersion = lib.mkForce "22.11";
+    stateVersion = lib.mkForce "24.11";
     activationScripts.report-changes = ''
-      PATH=$PATH:${lib.makeBinPath = [ pkgs.nvd pkgs.nix ]}
+      PATH=$PATH:${lib.makeBinPath [ pkgs.nvd pkgs.nix ]}
       nvd diff $(ls -dv /nix/var/nix/profiles/system-*-link | tail -2)
     '';
   };

@@ -67,6 +67,14 @@
     firewall.allowedTCPPorts = [8080 8009 8010];
   };
 
+  home-manager = {
+    users."${user.login}" = import "${root}/home";
+    extraSpecialArgs = { 
+      inherit inputs root user; 
+      stateVersion = "24.11";
+    };
+  };
+
   i18n.defaultLocale = "en_US.UTF-8";
 
   console = {
@@ -217,16 +225,17 @@
   environment = {
     defaultPackages = lib.mkForce [ ];
     systemPackages = with pkgs; [
+      doas-sudo-shim
       comma
-        hdparm
-        lm_sensors
-        lshw
-        pciutils
-        usbutils
-        pcsctools
-        git
-        rsync
-        libGL
+      hdparm
+      lm_sensors
+      lshw
+      pciutils
+      usbutils
+      pcsctools
+      git
+      rsync
+      libGL
     ];
 
     variables.EDITOR = "nvim";
