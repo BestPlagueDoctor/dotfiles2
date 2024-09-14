@@ -1,4 +1,4 @@
-{ config, pkgs, lib, modulesPath, ... }:
+args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
 {
   imports = [
@@ -208,14 +208,6 @@
     };
   };
 
-  sound = {
-    enable = false;
-    mediaKeys = {
-      enable = true;
-      volumeStep = "5%";
-    };
-  };
-
   users.users.sam = {
     isNormalUser = true;
     shell = pkgs.zsh;
@@ -282,7 +274,6 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    gtkUsePortal = true;
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
     ];
