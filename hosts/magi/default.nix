@@ -16,7 +16,22 @@
     };
   };
 
-  nix.settings.trusted-users = [ "@wheel" ];
+  nix = {
+    settings = {
+      trusted-users = [ "@wheel" ];
+      allowed-users = [ "@users" "@wheel" ];
+      experimental-features = [
+        "auto-allocate-uids"
+        "ca-derivations"
+        "flakes"
+        "nix-command"
+        "recursive-nix"
+      ];
+      warn-dirty = false;
+    };
+  };
+
+    
   nixpkgs.hostPlatform = "x86_64-linux";
 
   networking = {
@@ -63,24 +78,24 @@
     defaultPackages = lib.mkForce [ ];
     systemPackages = with pkgs; [
       bottom
-        fd
-        git
-        hdparm
-        ldns
-        lm_sensors
-        lshw
-        nmap
-        pciutils
-        profanity
-        ripgrep
-        rsync
-        tmux
-        tree
-        usbutils
-        wget
-        figlet
-        wakeonlan
-        rxvt-unicode
+      fd
+      git
+      hdparm
+      ldns
+      lm_sensors
+      lshw
+      nmap
+      pciutils
+      profanity
+      ripgrep
+      rsync
+      tmux
+      tree
+      usbutils
+      wget
+      figlet
+      wakeonlan
+      rxvt-unicode
     ];
 
     shellAliases = {
@@ -157,5 +172,5 @@
     };
   };
 
-  system.stateVersion = lib.mkForce "22.05";
+  system.stateVersion = lib.mkForce "24.11";
 }
