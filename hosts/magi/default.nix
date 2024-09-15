@@ -36,15 +36,14 @@
   networking = {
     hostName = "magi";
 
-    defaultGateway = "10.0.0.1";
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
-    interfaces.eno1.ipv4.addresses = [ {
-      address = "10.0.0.69";
-      prefixLength = 24;
-    } ];
+    interfaces.eno1 = {
+      useDHCP = true;
+      wakeOnLan.enable = true;
+    };
 
     firewall = {
-      allowedTCPPorts = [ 22 ];
+      allowedTCPPorts = [ 22 80 443 ];
     };
   };
 
@@ -144,13 +143,28 @@
     fail2ban.enable = false;
 
     minecraft-server = {
-      enable = true;
+      enable = false;
       eula = true;
     };
 
     openssh = {
       enable = true;
       settings.PasswordAuthentication = false;
+    };
+
+    nginx = {
+      user = "sam";
+      enable = true;
+      recommendedGzipSettings = true;
+      recommendedOptimisation = true;
+      recommendedProxySettings = true;
+      recommendedTlsSettings = true;
+      virtualHosts."plague.oreo.ooo" = {
+        forceSSL = true;
+        enableACME = true;
+        root = "/srv/media";
+        locations."/".extraConfig = "autoindex on;";
+      };
     };
   };
 
@@ -162,6 +176,11 @@
     allowUserNamespaces = true;
     protectKernelImage = true;
     unprivilegedUsernsClone = false;
+
+    acme = {
+      acceptTerms = true;
+      defaults.email = user.email;
+    };
 
     doas = {
       enable = true;
