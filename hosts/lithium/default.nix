@@ -89,7 +89,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
   };
 
   i18n.defaultLocale = "en_US.UTF-8";
-  time.timeZone = "America/Chicago";
+  time.timeZone = "America/New_York";
 
   console = {
     keyMap = "us";

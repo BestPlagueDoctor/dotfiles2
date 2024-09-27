@@ -29,7 +29,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
       fsType = "vfat";
     };
 
-  time.timeZone = "America/Chicago";
+  time.timeZone = "America/New_York";
 
   nix = {
     package = pkgs.nixVersions.latest;
