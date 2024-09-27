@@ -15,6 +15,28 @@
     };
   };
 
+  # NFS mounts to expose media to Kodi
+  # NOTE: when I transfer this server to a real guy, I'm going to need to do all this again
+  fileSystems."/export/music" = {
+    device = "/srv/media/music";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/export/tv" = {
+    device = "/srv/media/tv";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/export/movies" = {
+    device = "/srv/media/movies";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/export/games" = {
+    device = "/srv/media/games";
+    options = [ "bind" ];
+  };
+
   nix = {
     settings = {
       trusted-users = [ "@wheel" ];
@@ -43,7 +65,9 @@
     };
 
     firewall = {
-      allowedTCPPorts = [ 22 80 443 ];
+      enable = true;
+      allowedTCPPorts = [ 22 80 443 111 2049 4000 4001 4002 20048 ];
+      allowedUDPPorts = [ 111 2049 4000 4001 4002 20048];
     };
   };
 
@@ -150,6 +174,20 @@
     openssh = {
       enable = true;
       settings.PasswordAuthentication = false;
+    };
+
+    nfs = {
+      server.enable = true;
+      server.lockdPort = 4001;
+      server.mountdPort = 4002;
+      server.statdPort = 4000;
+      server.exports = ''
+      /export 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
+      /export/music 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
+      /export/movies 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
+      /export/tv 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
+      /export/games 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
+    '';
     };
 
     nginx = {
