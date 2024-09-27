@@ -127,7 +127,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
       alsa.enable = true;
       alsa.support32Bit = true;
       pulse.enable = true;
-      jack.enable = true;
+      jack.enable = false;
     };
 
     udev.packages = with pkgs; [
