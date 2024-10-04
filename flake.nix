@@ -104,6 +104,12 @@
           ./hosts/navi
         ];
       };
+
+      wsl = nixpkgs.lib.nixosSystem {
+        modules = modules ++ [
+          ./hosts/wsl
+        ];
+      };
     };
 
     homeConfigurations = forAllSystems (system: pkgs: with pkgs; {
