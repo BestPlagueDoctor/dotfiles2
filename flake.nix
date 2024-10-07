@@ -5,6 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11-small";
     nixos-hardware.url = "github:nixos/nixos-hardware";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
 
     ssbm.url = "github:djanatyn/ssbm-nix";
 
@@ -107,6 +108,7 @@
 
       wsl = nixpkgs.lib.nixosSystem {
         modules = modules ++ [
+          inputs.nixos-wsl.nixosModules.default
           ./hosts/wsl
         ];
       };

@@ -1,17 +1,15 @@
 args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
 {
-  imports = [
-    # include NixOS-WSL modules
-    (modulesPath + "/installer/scan/not-detected.nix")
-    <nixos-wsl/modules>
-  ];
-
   wsl = {
     enable = true;
-    defaultUser = "samuelk";
+    defaultUser = "sam";
+    nativeSystemd = true;
     wslConf.network.hostname = "wsl";
+    wslConf.automount.root = "/mnt";
   };
+
+  boot.isContainer = true;
 
   time.timeZone = "America/New_York";
 
@@ -44,7 +42,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
   };
 
   networking = {
-    hostName = "navi";
+    hostName = "X1";
     useDHCP = true;
     wireless.iwd.enable = true;
     networkmanager.enable = false;
@@ -52,9 +50,9 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
   };
 
   home-manager = {
-    users.samuelk = import "${root}/home";
+    users."${user.login}" = import "${root}/home";
     extraSpecialArgs = { 
-      inherit inputs root;
+      inherit inputs root user; 
       stateVersion = "24.11";
     };
   };
@@ -77,13 +75,14 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
       extraRules = [{
         groups = [ "wheel" ];
         keepEnv = true;
+        noPass = true;
       }];
     };
   };
 
   services = {
     avahi.enable = true;
-    blueman.enable = true;
+    #blueman.enable = true;
     fstrim.enable = true;
     openssh.enable = true;
     udisks2.enable = true;
@@ -92,63 +91,6 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     upower.enable = true;
     #logind.lidSwitch = "lock";
 
-    printing = {
-      enable = true;
-      drivers = with pkgs; [
-        cnijfilter2
-          gutenprint
-          gutenprintBin
-      ];
-    };
-
-    physlock = {
-      enable = true;
-      allowAnyUser = true;
-    };
-
-    pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      jack.enable = false;
-    };
-
-    udev.packages = with pkgs; [
-      ledger-udev-rules
-      yubikey-personalization
-      (pkgs.writeTextFile {
-       name = "52-xilinx-digilent-usb.rules";
-       text = ''
-       ATTR{idVendor}=="1443", MODE:="666"
-       ACTION=="add", ATTR{idVendor}=="0403", ATTR{manufacturer}=="Digilent", MODE:="666"
-       '';
-
-       destination = "/etc/udev/rules.d/52-xilinx-digilent-usb.rules";
-       })
-      (pkgs.writeTextFile {
-       name = "52-xilinx-ftdi-usb.rules";
-       text = ''
-       ACTION=="add", ATTR{idVendor}=="0403", ATTR{manufacturer}=="Xilinx", MODE:="666"
-       '';
-
-       destination = "/etc/udev/rules.d/52-xilinx-ftdi-usb.rules";
-       })
-      (pkgs.writeTextFile {
-       name = "52-xilinx-pcusb.rules";
-       text = ''
-       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0008", MODE="666"
-       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0007", MODE="666"
-       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0009", MODE="666"
-       ATTR{idVendor}=="03fd", ATTR{idProduct}=="000d", MODE="666"
-       ATTR{idVendor}=="03fd", ATTR{idProduct}=="000f", MODE="666"
-       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0013", MODE="666"
-       ATTR{idVendor}=="03fd", ATTR{idProduct}=="0015", MODE="666"
-       '';
-
-       destination = "/etc/udev/rules.d/52-xilinx-pcusb.rules";
-       })
-    ];
 
     actkbd = {
       enable = true;
@@ -167,32 +109,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     };
   };
 
-  virtualisation.virtualbox.host.enable = false;
-
-  hardware = {
-    bluetooth.enable = true;
-    cpu.intel.updateMicrocode = true;
-
-    opengl = {
-      enable = true;
-      driSupport32Bit = true;
-      extraPackages = with pkgs; [
-        intel-media-driver
-          libvdpau-va-gl
-          vaapiIntel
-          vaapiVdpau
-      ];
-    };
-
-    trackpoint = {
-      enable = true;
-      sensitivity = 150;
-      speed = 97;
-      emulateWheel = true;
-    };
-  };
-
-  users.users.samuelk = {
+  users.users.sam = {
     isNormalUser = true;
     shell = pkgs.zsh;
     extraGroups = [ "wheel" "networkmanager" "adbusers" ];
@@ -221,10 +138,11 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
   programs = {
     adb.enable = true;
+    dconf.enable = true;
     light.enable = true;
     nix-ld.enable = true;
-    hyprland.enable = true;
-    steam.enable = true;
+    hyprland.enable = false;
+    steam.enable = false;
     zsh.enable = true;
 
     neovim = {
@@ -252,15 +170,6 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
           '';
       };
     };
-  };
-
-
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-gtk
-    ];
   };
 
   zramSwap.enable = true;
