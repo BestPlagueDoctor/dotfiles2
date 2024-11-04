@@ -31,6 +31,8 @@ in
 
     username = user.login;
     packages = with pkgs; [
+      nixgl.nixGLIntel
+      
       asciiquarium
       adwaita-icon-theme
       bemenu
