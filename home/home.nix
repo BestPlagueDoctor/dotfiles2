@@ -31,8 +31,6 @@ in
 
     username = user.login;
     packages = with pkgs; [
-      nixgl.nixGLIntel
-      
       asciiquarium
       adwaita-icon-theme
       bemenu
@@ -88,7 +86,7 @@ in
       nmap
       nomacs
       noto-fonts
-      noto-fonts-cjk
+      noto-fonts-cjk-sans
       noto-fonts-emoji
       ntfs3g
       nurl

@@ -2,8 +2,8 @@
   description = "Nix-based config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11-small";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
     nixgl.url = "github:nix-community/nixGL";
@@ -54,7 +54,7 @@
       contentAddressedByDefault = false;
     };
 
-    overlays = [ inputs.emacs-overlay.overlays.default inputs.nixgl ];
+    overlays = [ inputs.emacs-overlay.overlays.default ];
 
     forAllSystems = f: nixpkgs.lib.genAttrs [
       "x86_64-linux"
@@ -117,11 +117,6 @@
     };
 
     homeConfigurations = forAllSystems (system: pkgs: with pkgs; {
-      serverbios = inputs.home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = hmModules ++ [ ./home ];
-      };
-
       default = inputs.home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = hmModules ++ [ ./home ];
