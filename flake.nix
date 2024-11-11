@@ -46,6 +46,11 @@
       url = "github:natsukagami/mpd-mpris";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, ... }: let
@@ -85,6 +90,7 @@
       inputs.home-manager.nixosModules.home-manager
       inputs.lanzaboote.nixosModules.lanzaboote
       inputs.ragenix.nixosModules.default
+      inputs.disko.nixosModules.disko
       ./modules
     ];
 
