@@ -327,6 +327,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     extraSpecialArgs = { 
       inherit inputs root user; 
       stateVersion = "24.11";
+      isHeadless = false;
     };
   };
 

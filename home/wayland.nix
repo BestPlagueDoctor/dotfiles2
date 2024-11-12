@@ -1,9 +1,9 @@
-{ config, sys, pkgs, lib, root, user, inputs, ... }:
+{ config, sys, pkgs, lib, root, user, inputs, isHeadless, ... }:
 
 {
   wayland = {
     windowManager.hyprland = {
-      enable = true;
+      enable = !isHeadless;
       settings = {
         env = "WLR_DRM_DEVICES,/dev/dri/card0";
         monitor = [

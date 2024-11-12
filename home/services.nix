@@ -1,4 +1,4 @@
-{ config, pkgs, lib, root, user, ... }:
+{ config, pkgs, lib, root, user, isHeadless, ... }:
 
 {
   services = {  
@@ -18,7 +18,7 @@
     };
 
     hypridle = {
-      enable = true;
+      enable = !isHeadless;
       settings = {
         general = {
           after_sleep_cmd = "hyprctl dispatch dpms on";
@@ -41,7 +41,7 @@
     };
 
     mako = {
-      enable = true;
+      enable = !isHeadless;
       extraConfig = ''
         [mode=do-not-disturb]
         invisible=1
@@ -60,7 +60,7 @@
     };
 
     wlsunset = {
-        enable = true;
+        enable = !isHeadless;
         latitude = 33.7;
         longitude = -84.3;
     };

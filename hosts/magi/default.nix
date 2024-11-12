@@ -1,103 +1,33 @@
-{ config, pkgs, lib, user, ... }:
+{ config, pkgs, lib, user, root, inputs, ... }:
 
 {
   boot = {
-    swraid = {
-      enable = true;
-      mdadmConf = ''
-        MAILADDR = ksam1337@gmail.com
-        '';
-    };
+    supportedFilesystems = [ "bcachefs" ];
+    initrd.supportedFilesystems = [ "bcachefs" ];
     loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
   };
 
-  disko.devices = {
-    disk = {
-      root = {
-        device = "/dev/disk/by-id/ata-Samsung_SSD_850_EVO_500GB_S3PTNB0J916962P";
-        type = "disk";
-        content = {
-          type = "gpt";
-          partitions = {
-            ESP = {
-              type = "EF00";
-              size = "3G";
-              content = {
-                type = "filesystem";
-                format = "vfat";
-                mountpoint = "/boot";
-              };
-            };
-            root = {
-              size = "100%";
-              content = {
-                type = "filesystem";
-                format = "ext4";
-                mountpoint = "/";
-              };
-            };
-          };
-        };
-      };
-      disk1 = {
-        type = "disk";
-        device = "/dev/by-id/ata-ST8000AS0002-1NA17Z_Z8410XB3";
-        content = {
-          type = "gpt";
-          partitions = {
-            mdadm = {
-              size = "100%";
-              content = {
-                type = "mdraid";
-                name = "raid1";
-              };
-            };
-          };
-        };
-      };
-      disk2 = {
-        type = "disk";
-        device = "/dev/ata-ST8000AS0002-1NA17Z_Z8411XWJ";
-        content = {
-          type = "gpt";
-          partitions = {
-            mdadm = {
-              size = "100%";
-              content = {
-                type = "mdraid";
-                name = "raid1";
-              };
-            };
-          };
-        };
-      };
-    };
-    mdadm = {
-      raid1 = {
-        type = "mdadm";
-        level = 1;
-        content = {
-          type = "gpt";
-          partitions = {
-            primary = {
-              size = "100%";
-              content = {
-                type = "filesystem";
-                format = "ext4";
-                mountpoint = "/srv/tank";
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-
 # NFS mounts to expose media to Kodi
 # NOTE: when I transfer this server to a real guy, I'm going to need to do all this again
+  fileSystems."/" = { 
+    device = "/dev/disk/by-uuid/de0a7a75-0032-4556-a7bf-3ec140644402";
+    fsType = "ext4";
+  };
+
+  fileSystems."/boot" = { 
+    device = "/dev/disk/by-uuid/38D6-7A92";
+    fsType = "vfat";
+  };
+
+  fileSystems."/srv/tank" = {
+    device = "/dev/disk/by-uuid/efaaa7ec-a9eb-4a10-9b32-33b8f04c1247";
+    fsType = "bcachefs";
+    options = [ "defaults" "nofail" "compression=zstd" ];
+  };
+
   fileSystems."/export/music" = {
     device = "/srv/tank/public/music";
     options = [ "bind" ];
@@ -188,6 +118,8 @@
     defaultPackages = lib.mkForce [ ];
     systemPackages = with pkgs; [
       bottom
+      btop
+      comma
       doas-sudo-shim
       fd
       git
@@ -333,6 +265,15 @@
       };
     };
   };
+
+  #home-manager = {
+  #  users."${user.login}" = import "${root}/home";
+  #  extraSpecialArgs = {
+  #    inherit inputs root user;
+  #    stateVersion = config.system.stateVersion;
+  #    isHeadless = true;
+  #  };
+  #};
 
   security = {
     auditd.enable = true;

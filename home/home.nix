@@ -6,6 +6,7 @@
 , root
 , user
 , inputs
+, isHeadless
 , stateVersion
 , ...
 }:

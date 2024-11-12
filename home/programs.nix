@@ -1,4 +1,4 @@
-args@{ config, osConfig, pkgs, lib, inputs, root, user, ... }:
+args@{ config, osConfig, pkgs, lib, inputs, root, user, isHeadless, ... }:
 
 let
   inherit (osConfig.nixpkgs) hostPlatform;
@@ -10,7 +10,7 @@ in {
     home-manager.enable = true;
     nix-index.enable = true;
     noti.enable = true;
-    zathura.enable = true;
+    zathura.enable = !isHeadless;
     zoxide.enable = true;
 
     atuin = {
@@ -71,7 +71,7 @@ in {
     };
 
     foot = {
-      enable = true;
+      enable = !isHeadless;
       server.enable = true;
 
       settings = {
@@ -150,7 +150,7 @@ in {
     };
 
     hyprlock = {
-      enable = true;
+      enable = !isHeadless;
       settings = {
         general = {
           disable_loading_bar = true;
@@ -186,7 +186,7 @@ in {
     };
 
     mpv = {
-      enable = true;
+      enable = !isHeadless;
       config = {
         gpu-api = "vulkan";
         gpu-context = "wayland";
@@ -207,7 +207,7 @@ in {
     };
 
     nushell = {
-      enable = true;
+      enable = !isHeadless;
     
       shellAliases = config.home.shellAliases;
     
@@ -236,7 +236,7 @@ in {
     };
 
     waybar = {
-      enable = true;
+      enable = !isHeadless;
       systemd.enable = true;
 
       settings = {
@@ -362,7 +362,7 @@ in {
     };
     
     yt-dlp = {
-      enable = true;
+      enable = !isHeadless;
       settings = {
         embed-thumbnail = true;
         downloader = "aria2c";
