@@ -266,14 +266,14 @@
     };
   };
 
-  #home-manager = {
-  #  users."${user.login}" = import "${root}/home";
-  #  extraSpecialArgs = {
-  #    inherit inputs root user;
-  #    stateVersion = config.system.stateVersion;
-  #    isHeadless = true;
-  #  };
-  #};
+  home-manager = {
+    users."${user.login}" = import "${root}/home";
+    extraSpecialArgs = {
+      inherit inputs root user;
+      stateVersion = config.system.stateVersion;
+     isHeadless = true;
+    };
+  };
 
   security = {
     auditd.enable = true;

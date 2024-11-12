@@ -33,20 +33,14 @@ in
     username = user.login;
     packages = with pkgs; [
       asciiquarium
-      adwaita-icon-theme
-      bemenu
       bluetuith
-      breeze-icons
       btop
       bubblewrap
       comma
       direnv
-      discord-canary
-      dolphin
       dos2unix
       dosfstools
       duf
-      easyeffects
       efibootmgr
       exfatprogs
       fasd
@@ -55,24 +49,18 @@ in
       file
       fira-code
       fira-code-symbols
-      firefox-wayland
       gh
-      gimp-with-plugins
-      google-chrome
       grim
       gtk3
       hack-font
       hicolor-icon-theme
       htop
       hyperfine
-      imv
       iperf
       jq
       killall
-      kotatogram-desktop
       ldns
       libnotify
-      libreoffice-fresh
       libva-utils
       lsof
       material-design-icons
@@ -80,7 +68,6 @@ in
       miniserve
       mpc_cli
       ncdu
-      ncspot
       nix-inspect
       nix-output-monitor
       nix-tree
@@ -93,12 +80,8 @@ in
       nurl
       onefetch
       pamixer
-      pandoc
       patchutils
-      pavucontrol
-      playerctl
       powertop
-      prismlauncher
       procs
       remmina
       ripgrep
@@ -106,35 +89,53 @@ in
       ragenix
       rclone
       scc
-      scrcpy
-      simple-scan
-      slurp
       sops
       speedtest-cli
-      spotify
-      strace
-      sunshine
-      swappy
-      swaylock
       tamsyn
       tcpdump
       unzip
-      vial
-      virt-manager
-      vlc
       wget
       whois
+      zellij
+      zip
+    ] ++ (lib.optionals (!isHeadless) [
+      bemenu
+      prismlauncher
+      pavucontrol
+      swappy
+      sunshine
+      gimp-with-plugins
+      adwaita-icon-theme
+      easyeffects
+      breeze-icons
+      dolphin
+      slurp
+      kotatogram-desktop
+      firefox-wayland
+      ncspot
+      imv
+      google-chrome
+      spotify
+      discord-canary
+      libreoffice-fresh
+      scrcpy
+      pandoc
+      playerctl
+      simple-scan
+      strace
+      vial
+      vlc
+      virt-manager
       wireshark
+      swaylock
       wl-clipboard
       wlr-randr
       xdg-user-dirs
       xdg-utils
       xorg.xeyes
       xorg.xkill
-      zellij
-      zip
       zoom-us
-    ];
+    ]);
 
     file = {
       dnsCheck = {
