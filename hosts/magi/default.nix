@@ -28,26 +28,6 @@
     options = [ "defaults" "nofail" "compression=zstd" ];
   };
 
-  fileSystems."/export/music" = {
-    device = "/srv/tank/public/music";
-    options = [ "bind" ];
-  };
-
-  fileSystems."/export/tv" = {
-    device = "/srv/tank/public/tv";
-    options = [ "bind" ];
-  };
-
-  fileSystems."/export/movies" = {
-    device = "/srv/tank/public/movies";
-    options = [ "bind" ];
-  };
-
-  fileSystems."/export/games" = {
-    device = "/srv/tank/public/games";
-    options = [ "bind" ];
-  };
-
   nix = {
     settings = {
       trusted-users = [ "@wheel" ];
@@ -60,6 +40,18 @@
         "recursive-nix"
       ];
       warn-dirty = false;
+    };
+  };
+
+  hardware = {
+    opengl.enable = true;
+    nvidia = {
+      modesetting.enable = true;
+      powerManagement.enable = false;
+      powerManagement.finegrained = false;
+      open = false;
+      nvidiaSettings = true;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
   };
 
@@ -111,6 +103,8 @@
         isSystemUser = true;
         group = "dufs";
       };
+
+      kodi.isNormalUser = true;
     };
   };
 
@@ -187,7 +181,7 @@
     fail2ban.enable = false;
 
     minecraft-server = {
-      enable = false;
+      enable = true;
       eula = true;
     };
 
@@ -196,18 +190,15 @@
       settings.PasswordAuthentication = false;
     };
 
-    nfs = {
-      server.enable = true;
-      server.lockdPort = 4001;
-      server.mountdPort = 4002;
-      server.statdPort = 4000;
-      server.exports = ''
-      /export 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
-      /export/music 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
-      /export/movies 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
-      /export/tv 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
-      /export/games 10.0.0.86(rw,all_squash,insecure,anonuid=1000,anongid=100)
-    '';
+    xserver = {
+      enable = true;
+      videoDrivers = [ "nvidia" ];
+      desktopManager.kodi.enable = true;
+      displayManager = {
+        autoLogin.enable = true;
+        autoLogin.user = "kodi";
+        lightdm.greeter.enable = false;
+      };
     };
 
     nginx = {
@@ -301,3 +292,42 @@
 
   system.stateVersion = lib.mkForce "24.11";
 }
+
+
+
+#  fileSystems."/export/music" = {
+#    device = "/srv/tank/public/music";
+#    options = [ "bind" ];
+#  };
+#
+#  fileSystems."/export/tv" = {
+#    device = "/srv/tank/public/tv";
+#    options = [ "bind" ];
+#  };
+#
+#  fileSystems."/export/movies" = {
+#    device = "/srv/tank/public/movies";
+#    options = [ "bind" ];
+#  };
+#
+#  fileSystems."/export/games" = {
+#    device = "/srv/tank/public/games";
+#    options = [ "bind" ];
+#  };
+#
+
+
+#    nfs = {
+#      server.enable = true;
+#      server.lockdPort = 4001;
+#      server.mountdPort = 4002;
+#      server.statdPort = 4000;
+#      server.exports = ''
+#      /export 10.0.0.69(rw,all_squash,insecure,anonuid=1000,anongid=100)
+#      /export/music 10.0.0.69(rw,all_squash,insecure,anonuid=1000,anongid=100)
+#      /export/movies 10.0.0.69(rw,all_squash,insecure,anonuid=1000,anongid=100)
+#      /export/tv 10.0.0.69(rw,all_squash,insecure,anonuid=1000,anongid=100)
+#      /export/games 10.0.0.69(rw,all_squash,insecure,anonuid=1000,anongid=100)
+#    '';
+#    };
+#
