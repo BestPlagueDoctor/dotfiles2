@@ -9,14 +9,14 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
       verbose = false;
       # in case i lose it
       #kernelModules = [ "nvme" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
-      kernelModules = [ "nvme" ];
+      kernelModules = [ "amdgpu" "radeon" "nvme" ];
     };
 
     consoleLogLevel = 0;
 
-    kernelModules = [ "kvm-amd" "kvm-intel" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
+    kernelModules = [ "radeon" "kvm-amd" "kvm-intel" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
     blacklistedKernelModules = [ "nvidia" "nouveau" ];
-    kernelParams = [ "amd_iommu=on" "fbcon=map:1" ];
+    kernelParams = [ "amd_iommu=on" "fbcon=map:1" "video=DP-1:1024x768@60" "video=DP-2:1920x1200@60" "video=HDMI-A-1:1920x1080@144" ];
     #extraModprobeConfig = "options kvm_intel nested=1 vfio-pci ids=10de:2484, 10de:228b ";
 
     postBootCommands = ''
@@ -70,6 +70,8 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     cpu.amd.updateMicrocode = true;
     rtl-sdr.enable = true;
 
+    opengl.extraPackages = with pkgs; [ amdvlk ];
+    opengl.extraPackages32 = with pkgs; [ driversi686Linux.amdvlk ];
     graphics = {
       enable = true;
       enable32Bit = true;
@@ -146,7 +148,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     gvfs.enable = true;
 
     avahi = {
-      enable = true;
+      enable = false;
       nssmdns4 = true;
       nssmdns6 = true;
     };
@@ -179,7 +181,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     };
 
     resolved = {
-      enable = true;
+      enable = false;
       fallbackDns = lib.mkForce [];
       dnssec = "false";
     };
@@ -333,6 +335,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
 
   environment = {
     defaultPackages = lib.mkForce [ ];
+    variables.ROC_ENABLE_PRE_VEGA = "1";
 
     systemPackages = (with pkgs; [
       doas-sudo-shim
