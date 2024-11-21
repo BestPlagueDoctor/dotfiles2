@@ -52,6 +52,7 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
   home-manager = {
     users."${user.login}" = import "${root}/home";
     extraSpecialArgs = { 
+      isHeadless = false;
       inherit inputs root user; 
       stateVersion = "24.11";
     };

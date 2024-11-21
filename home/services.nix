@@ -2,8 +2,8 @@
 
 {
   services = {  
-    mpd-mpris.enable = true;
-    mpris-proxy.enable = true;
+    #mpd-mpris.enable = true;
+    #mpris-proxy.enable = true;
     playerctld.enable = true;
 
     emacs = {
@@ -49,7 +49,7 @@
     };
 
     mpd = {
-      enable = true;
+      enable = false;
       network.startWhenNeeded = true;
       extraConfig = ''
       audio_output {
