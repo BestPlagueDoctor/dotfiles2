@@ -42,10 +42,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    mpd-mpris = {
-      url = "github:natsukagami/mpd-mpris";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    #mpd-mpris = {
+    #  url = "github:natsukagami/mpd-mpris";
+    #  inputs.nixpkgs.follows = "nixpkgs";
+    #};
 
     disko = {
       url = "github:nix-community/disko/latest";
@@ -81,9 +81,10 @@
       { nixpkgs = { inherit config overlays; }; }
     ];
 
-    hmModules = baseModules ++ [
-      inputs.mpd-mpris.homeManagerModules.default
-    ];
+    #hmModules = baseModules ++ [
+    #  inputs.mpd-mpris.homeManagerModules.default
+    #];
+    hmModules = baseModules;
 
     modules = hmModules ++ [
       inputs.ssbm.nixosModule
@@ -125,7 +126,21 @@
     homeConfigurations = forAllSystems (system: pkgs: with pkgs; {
       default = inputs.home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = hmModules ++ [ ./home ];
+        modules = hmModules ++ [ 
+	  { nixpkgs = {inherit config overlays;}; }
+	  ./home 
+	  {
+	    home = {
+	      homeDirectory = "/home/${user.login}";
+	      username = "${user.login}";
+	    };
+	  }
+	];
+	extraSpecialArgs = {
+	  stateVersion = "24.11";
+	  isHeadless = false;
+	  osConfig.nixpkgs = pkgs;
+	};
       };
     });
 

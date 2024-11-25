@@ -9,12 +9,12 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
       verbose = false;
       # in case i lose it
       #kernelModules = [ "nvme" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
-      kernelModules = [ "amdgpu" "radeon" "nvme" ];
+      kernelModules = [ "amdgpu" "nvme" ];
     };
 
     consoleLogLevel = 0;
 
-    kernelModules = [ "radeon" "kvm-amd" "kvm-intel" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
+    kernelModules = [ "kvm-amd" "kvm-intel" "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" "vfio_virqfd"];
     blacklistedKernelModules = [ "nvidia" "nouveau" ];
     kernelParams = [ "amd_iommu=on" "fbcon=map:1" "video=DP-1:1024x768@60" "video=DP-2:1920x1200@60" "video=HDMI-A-1:1920x1080@144" ];
     #extraModprobeConfig = "options kvm_intel nested=1 vfio-pci ids=10de:2484, 10de:228b ";
