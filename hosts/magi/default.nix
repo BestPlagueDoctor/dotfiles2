@@ -44,7 +44,7 @@
   };
 
   hardware = {
-    opengl.enable = true;
+    graphics.enable = true;
     nvidia = {
       modesetting.enable = true;
       powerManagement.enable = false;
@@ -62,14 +62,14 @@
     hostName = "magi";
 
     nameservers = [ "1.1.1.1" "1.0.0.1" ];
-    interfaces.enp6s0 = {
+    interfaces.enp7s0 = {
       useDHCP = true;
       wakeOnLan.enable = true;
     };
 
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 22 80 443 111 2049 4000 4001 4002 20048 ];
+      allowedTCPPorts = [ 22 80 443 111 2049 4000 4001 4002 8080 20048 ];
       allowedUDPPorts = [ 111 2049 4000 4001 4002 20048];
     };
   };
@@ -190,15 +190,15 @@
       settings.PasswordAuthentication = false;
     };
 
+    displayManager = {
+      autoLogin.enable = true;
+      autoLogin.user = "kodi";
+    };
     xserver = {
       enable = true;
       videoDrivers = [ "nvidia" ];
       desktopManager.kodi.enable = true;
-      displayManager = {
-        autoLogin.enable = true;
-        autoLogin.user = "kodi";
-        lightdm.greeter.enable = false;
-      };
+      displayManager.lightdm.greeter.enable = false;
     };
 
     nginx = {
