@@ -34,10 +34,10 @@
       allowed-users = [ "@users" "@wheel" ];
       experimental-features = [
         "auto-allocate-uids"
-        "ca-derivations"
-        "flakes"
-        "nix-command"
-        "recursive-nix"
+          "ca-derivations"
+          "flakes"
+          "nix-command"
+          "recursive-nix"
       ];
       warn-dirty = false;
     };
@@ -55,7 +55,7 @@
     };
   };
 
-    
+
   nixpkgs.hostPlatform = "x86_64-linux";
 
   networking = {
@@ -69,7 +69,7 @@
 
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 22 80 443 111 2049 4000 4001 4002 8080 20048 ];
+      allowedTCPPorts = [ 22 80 443 111 2049 4000 4001 4002 8080 8096 20048 ];
       allowedUDPPorts = [ 111 2049 4000 4001 4002 20048];
     };
   };
@@ -112,28 +112,28 @@
     defaultPackages = lib.mkForce [ ];
     systemPackages = with pkgs; [
       bottom
-      btop
-      comma
-      doas-sudo-shim
-      fd
-      git
-      hdparm
-      ldns
-      lm_sensors
-      lshw
-      nmap
-      pciutils
-      profanity
-      ripgrep
-      rsync
-      tmux
-      tree
-      usbutils
-      wget
-      figlet
-      wakeonlan
-      rxvt-unicode
-    ];
+        btop
+        comma
+        doas-sudo-shim
+        fd
+        git
+        hdparm
+        ldns
+        lm_sensors
+        lshw
+        nmap
+        pciutils
+        profanity
+        ripgrep
+        rsync
+        tmux
+        tree
+        usbutils
+        wget
+        figlet
+        wakeonlan
+        rxvt-unicode
+        ];
 
     shellAliases = {
       sudo = "doas";
@@ -201,29 +201,90 @@
       displayManager.lightdm.greeter.enable = false;
     };
 
+    jellyfin = {
+      enable = true;
+    };
+
     nginx = {
       user = "sam";
       enable = true;
+      enableQuicBPF = true;
+      enableReload = true;
       recommendedGzipSettings = true;
       recommendedOptimisation = true;
       recommendedProxySettings = true;
       recommendedTlsSettings = true;
+      package = pkgs.nginxQuic;
+
       virtualHosts."plague.oreo.ooo" = {
         forceSSL = true;
         enableACME = true;
         locations."/".proxyPass = "http://[::1]:8001";
         extraConfig = ''
           ignore_invalid_headers off;
-          client_max_body_size 0;
-          proxy_buffering off;
-          proxy_set_header Host $host;
+        client_max_body_size 0;
+        proxy_buffering off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 300;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        chunked_transfer_encoding off;
+        '';
+      };
+
+      virtualHosts."ooo.oreo.ooo" = {
+        enableACME = true;
+        forceSSL = true;
+        locations = let
+          proxyPass = "http://127.0.0.1:8096";
+        commonProxy = ''
           proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $remote_addr;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          proxy_connect_timeout 300;
-          proxy_http_version 1.1;
-          proxy_set_header Connection "";
-          chunked_transfer_encoding off;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Protocol $scheme;
+        proxy_set_header X-Forwarded-Host $http_host;
+        '';
+        in {
+          "/" = {
+            inherit proxyPass;
+            extraConfig = commonProxy + ''
+# Disable buffering when the nginx proxy gets very resource heavy upon streaming.
+              proxy_buffering off;
+            '';
+          };
+
+          "/socket" = {
+            inherit proxyPass;
+            proxyWebsockets = true;
+            extraConfig = commonProxy;
+          };
+        };
+
+        extraConfig = ''
+## The default `client_max_body_size` is 1M, this might not be enough for some posters, etc.
+          client_max_body_size 20M;
+
+# Security / XSS Mitigation Headers
+# NOTE: X-Frame-Options may cause issues with the webOS app
+        add_header X-Frame-Options "SAMEORIGIN";
+        add_header X-Content-Type-Options "nosniff";
+
+# Permissions policy. May cause issues with some clients
+        add_header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), battery=(), bluetooth=(), camera=(), clipboard-read=(), display-capture=(), document-domain=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), payment=(), publickey-credentials-get=(), serial=(), sync-xhr=(), usb=(), xr-spatial-tracking=()" always;
+
+# Content Security Policy
+# See: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+# Enforces https content and restricts JS/CSS to origin
+# External Javascript (such as cast_sender.js for Chromecast) must be whitelisted.
+# NOTE: The default CSP headers may cause issues with the webOS app
+        add_header Content-Security-Policy "default-src https: data: blob: ; img-src 'self' https://* ; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.youtube.com blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'self'";
+
+#quic_gso on;
+#quic_retry on;
+#add_header Alt-Svc 'h3=":443"; ma=86400';
         '';
       };
     };
@@ -234,11 +295,11 @@
 
     tmpfiles.rules = [
       "d /run/cache 0755 - - -"
-      "d /var/etc 0755 - - -"
-      "d /var/srv 0755 - - -"
-      "d /run/tmp 1777 - - -"
+        "d /var/etc 0755 - - -"
+        "d /var/srv 0755 - - -"
+        "d /run/tmp 1777 - - -"
 
-      "L /srv - - - - /var/srv"
+        "L /srv - - - - /var/srv"
     ];
 
     services = {
@@ -251,7 +312,7 @@
           User = "dufs";
           ExecStart = ''
             ${pkgs.dufs}/bin/dufs -c /etc/dufs.yaml
-          '';
+            '';
         };
       };
     };
@@ -262,7 +323,7 @@
     extraSpecialArgs = {
       inherit inputs root user;
       stateVersion = config.system.stateVersion;
-     isHeadless = true;
+      isHeadless = true;
     };
   };
 
