@@ -70,8 +70,6 @@ args@{ config, pkgs, lib, modulesPath, inputs, root, user, ... }:
     cpu.amd.updateMicrocode = true;
     rtl-sdr.enable = true;
 
-    opengl.extraPackages = with pkgs; [ amdvlk ];
-    opengl.extraPackages32 = with pkgs; [ driversi686Linux.amdvlk ];
     graphics = {
       enable = true;
       enable32Bit = true;
