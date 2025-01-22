@@ -45,6 +45,7 @@
 
   hardware = {
     graphics.enable = true;
+    pulseaudio.enable = true;
     nvidia = {
       modesetting.enable = true;
       powerManagement.enable = false;
@@ -54,6 +55,8 @@
       package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
   };
+
+  services.pipewire.enable = lib.mkForce false;
 
 
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -181,7 +184,7 @@
     fail2ban.enable = false;
 
     minecraft-server = {
-      enable = true;
+      enable = false;
       eula = true;
     };
 
